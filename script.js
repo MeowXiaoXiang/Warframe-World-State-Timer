@@ -39,9 +39,9 @@ const worlds = {
     cambion: {
         name: '魔裔禁地',
         startTime: "2021-02-05T12:27:54Z",
-        loopTime: 9000,
-        dayTime: 5000,
-        nightTime: 4000,
+        loopTime: 8998.875,
+        dayTime: 5998.875,
+        nightTime: 3000,
         dayStatusName: 'Fass',
         nightStatusName: 'Vome',
         dayIcon: '🟧',
