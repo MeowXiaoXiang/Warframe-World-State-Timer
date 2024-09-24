@@ -57,6 +57,23 @@ body {
 }
 
 /* 模態框樣式 */
+.modal-subheader {
+    display: flex;
+    justify-content: space-around;
+    font-weight: bold;
+    padding: 10px 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+}
+
+.modal-subtitle {
+    text-align: center;
+    flex: 1;
+}
+
 .modal-body {
     max-height: 70vh;
     overflow-y: auto;
