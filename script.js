@@ -17,9 +17,9 @@ const worlds = {
     earth: {
         name: '地球森林',
         startTime: "2015-12-03T00:00:00Z",
-        loopTime: 28800 + 14400, // 12小時
-        dayTime: 28800, // 8小時
-        nightTime: 14400, // 4小時
+        loopTime: 28800, // 8小時 (總循環時間)
+        dayTime: 14400, // 4小時 (白天)
+        nightTime: 14400, // 4小時 (晚上)
         dayStatusName: '白晝',
         nightStatusName: '夜晚',
         dayIcon: '☀️',
