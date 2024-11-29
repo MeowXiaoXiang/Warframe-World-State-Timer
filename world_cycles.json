@@ -1,0 +1,48 @@
+{
+    "worlds": {
+        "earth": {
+            "name": "地球森林",
+            "startTime": "2015-12-03T00:00:00Z",
+            "loopTime": 28800,
+            "dayTime": 14400,
+            "nightTime": 14400,
+            "dayStatusName": "白晝",
+            "nightStatusName": "夜晚",
+            "dayIcon": "☀️",
+            "nightIcon": "🌙"
+        },
+        "plains": {
+            "name": "夜靈平原",
+            "startTime": "2021-02-05T12:27:54Z",
+            "loopTime": 8998.874,
+            "dayTime": 5998.874,
+            "nightTime": 3000,
+            "dayStatusName": "白晝",
+            "nightStatusName": "夜晚",
+            "dayIcon": "☀️",
+            "nightIcon": "🌙"
+        },
+        "orb": {
+            "name": "奧布山谷",
+            "startTime": "2021-01-09T08:13:48Z",
+            "loopTime": 1600,
+            "dayTime": 400,
+            "nightTime": 1200,
+            "dayStatusName": "溫暖",
+            "nightStatusName": "寒冷",
+            "dayIcon": "🔥",
+            "nightIcon": "❄️"
+        },
+        "cambion": {
+            "name": "魔裔禁地",
+            "startTime": "2021-02-05T12:27:54Z",
+            "loopTime": 8998.874,
+            "dayTime": 5998.874,
+            "nightTime": 3000,
+            "dayStatusName": "Fass",
+            "nightStatusName": "Vome",
+            "dayIcon": "🟧",
+            "nightIcon": "🟦"
+        }
+    }
+}

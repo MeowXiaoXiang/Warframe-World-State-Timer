@@ -1,146 +1,179 @@
+/* === 全局樣式 === */
+/* 背景顏色 & 全局字體設定 */
 body {
-    background-color: #f4f4f9;
-    font-family: Arial, sans-serif;
+    background-color: #f4f4f9; /* 柔和的背景色 */
+    font-family: Arial, sans-serif; /* 常見的無襯線字體，適合界面 */
 }
 
+/* === 卡片樣式 === */
+/* 單個卡片的外觀設定 */
 .card {
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-    transition: transform 0.3s ease;
-    cursor: pointer;
+    border-radius: 12px; /* 卡片的圓角設計 */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* 陰影效果讓卡片有浮起感 */
+    margin: 20px auto; /* 水平置中，且上下有間距 */
+    max-width: 400px; /* 卡片的最大寬度，避免太寬 */
+    transition: transform 0.3s ease; /* 卡片 hover 時的動畫效果 */
+    cursor: pointer; /* 滑鼠經過時顯示點擊手勢 */
 }
 
+/* 卡片 hover 時的效果 */
 .card:hover {
-    transform: scale(1.05);
+    transform: scale(1.05); /* 輕微放大 */
 }
 
+/* 卡片內容設定 */
 .card-body {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 12px;
+    justify-content: space-between; /* 左右分佈 */
+    align-items: center; /* 垂直置中 */
+    padding: 20px; /* 卡片內部的間距 */
+    background-color: #ffffff; /* 卡片背景顏色 */
+    border-radius: 12px; /* 圓角保持一致 */
 }
 
 .card-text {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
+    font-size: 1.2rem; /* 主要文字大小 */
+    font-weight: bold; /* 文字加粗 */
+    color: #333; /* 深色文字，對比清晰 */
 }
 
 .time-left {
-    font-size: 1rem;
-    color: #555;
+    font-size: 1rem; /* 副文字大小 */
+    color: #555; /* 灰色文字 */
 }
 
 .status-icon {
-    font-size: 40px;
-    margin-left: 20px;
+    font-size: 40px; /* 狀態圖示的大小 */
+    margin-left: 20px; /* 與文字的間距 */
 }
 
-#current-time {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    color: #888;
-    text-align: center;
-}
-
-.container {
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* 模態框樣式 */
+/* === 模態框相關樣式 === */
+/* 模態框子標題的分佈 */
 .modal-subheader {
     display: flex;
+    justify-content: space-around; /* 子標題左右分佈 */
+    font-weight: bold; /* 標題加粗 */
+    padding: 10px 0; /* 上下間距 */
+    background-color: #f8f9fa; /* 模態框背景色 */
+    border-bottom: 1px solid #ddd; /* 底部的分隔線 */
+    position: sticky; /* 固定位置，滾動時保持可見 */
+    top: 0; /* 靠頂部對齊 */
+    z-index: 1050; /* 保證層級不被其他內容遮蓋 */
+}
+
+/* 模態框的滾動內容 */
+.modal-body {
+    max-height: 70vh; /* 最大高度限制，防止超出視窗 */
+    overflow-y: auto; /* 滾動條 */
+    padding: 20px; /* 內邊距 */
+}
+
+/* === 白天與夜晚容器樣式 === */
+/* 白天和夜晚的容器外框 */
+.day-night-row {
+    display: flex;
+    justify-content: space-between; /* 左右排列 */
+    gap: 20px; /* 容器之間的間距 */
+    margin-bottom: 20px; /* 與其他內容的間距 */
+}
+
+/* 白天和夜晚的內容容器 */
+.day-container,
+.night-container {
+    flex: 1; /* 平分空間 */
+    padding: 15px; /* 內部的間距 */
+    border-radius: 10px; /* 圓角 */
+    background-color: #f9f9f9; /* 默認背景色 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 陰影讓內容更有層次 */
+    display: flex; /* 使用 Flexbox 排列內部內容 */
+    flex-direction: column; /* 垂直排列 */
+    align-items: center; /* 水平置中 */
+    justify-content: center; /* 垂直置中 */
+    gap: 10px; /* 子元素之間的間距 */
+}
+
+/* 白天容器背景 */
+.day-container {
+    background-color: #fffbea; /* 淡黃色背景 */
+}
+
+/* 夜晚容器背景 */
+.night-container {
+    background-color: #eef5ff; /* 淡藍色背景 */
+}
+
+/* === 時段卡片樣式 === */
+/* 單個時段卡片 */
+.cycle-item {
+    padding: 10px 15px; /* 內邊距 */
+    border-radius: 8px; /* 圓角 */
+    background-color: white; /* 卡片背景色 */
+    border: 1px solid #ddd; /* 卡片邊框 */
+    font-size: 1rem; /* 文字大小 */
+    width: 100%; /* 卡片寬度撐滿容器 */
+    max-width: 200px; /* 設置最大寬度，防止過寬 */
+    text-align: center; /* 文字置中 */
+}
+
+/* === 日期標頭 === */
+.schedule-date {
+    font-size: 1.2rem; /* 字體大小 */
+    font-weight: bold; /* 加粗 */
+    margin: 20px 0; /* 上下間距 */
+    text-align: center; /* 文字置中 */
+    color: #333; /* 深色文字 */
+    border-bottom: 2px solid #ddd; /* 日期分隔線 */
+    padding-bottom: 5px; /* 日期下方間距 */
+}
+
+/* === 狀態提示樣式 === */
+/* 狀態標籤 */
+.status-label {
+    padding: 5px 10px; /* 標籤內邊距 */
+    font-size: 0.9rem; /* 標籤文字大小 */
+    border-radius: 4px; /* 圓角 */
+    color: white; /* 白色文字 */
+    text-align: center; /* 文字置中 */
+}
+
+/* 無數據提示 */
+.no-data {
+    text-align: center; /* 文字置中 */
+    color: #666; /* 灰色文字 */
+    font-size: 1.2rem; /* 字體大小 */
+    margin-top: 20px; /* 與其他內容的間距 */
+}
+
+/* 圖例區域樣式 */
+.modal-legend {
+    display: flex;
     justify-content: space-around;
-    font-weight: bold;
-    padding: 10px 0;
+    padding: 10px;
     background-color: #f8f9fa;
     border-bottom: 1px solid #ddd;
-    position: sticky;
-    top: 0;
-    z-index: 1050;
 }
 
-.modal-subtitle {
-    text-align: center;
-    flex: 1;
-}
-
-.modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.schedule-header {
-    display: flex;
-    justify-content: space-around;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.header-divider {
-    border-top: 2px solid #ccc;
-    margin: 10px 0;
-}
-
-.schedule-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-}
-
-.schedule-item>div {
-    width: 48%;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center; /* 元素自動置中 */
-}
-
-.schedule-time {
-    font-weight: bold;
-    text-align: center;
-}
-
-.status-label {
-    padding: 2px 8px;
-    border-radius: 4px;
-    color: #fff;
+.legend-item {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
     font-size: 0.9rem;
-    margin-top: 5px;
-    text-align: center;
+    font-weight: bold;
+    color: rgb(15, 15, 15);
 }
 
-.status-ended {
-    background-color: #d9534f;
-}
-
-.status-ongoing {
-    background-color: #5cb85c;
+.status-not-started {
+    background-color: #c2bbbb; /* 灰色 */
 }
 
 .status-next {
-    background-color: #f0ad4e;
+    background-color: #ffc400; /* 橘色 */
 }
 
-.status-upcoming {
-    background-color: #6c757d;
+.status-ongoing {
+    background-color: #C2FF68; /* 綠色 */
 }
 
-.schedule-date {
-    font-size: 1.5rem; /* 字體放大 */
-    font-weight: bold;
-    text-align: center;
-    margin: 20px 0; /* 上下間距增大，便於閱讀 */
+.status-ended {
+    background-color: #FF97B6; /* 紅色 */
 }

@@ -1,47 +1,108 @@
-// dayjs 插件擴展
 dayjs.extend(dayjs_plugin_utc);
 dayjs.extend(dayjs_plugin_timezone);
+dayjs.extend(dayjs_plugin_isBetween);
 
-// 世界資料設定
-const worlds = {
-    plains: createWorldData('夜靈平原', "2021-02-05T12:27:54Z", 8998.875, 5998.875, 3000, '白晝', '夜晚', '☀️', '🌙'),
-    earth: createWorldData('地球森林', "2015-12-03T00:00:00Z", 28800, 14400, 14400, '白晝', '夜晚', '☀️', '🌙'),
-    orb: createWorldData('奧布山谷', "2021-01-09T08:13:48Z", 2200, 1600, 600, '溫暖', '寒冷', '🔥', '❄️'),
-    cambion: createWorldData('魔裔禁地', "2021-02-05T12:27:54Z", 8998.875, 5998.875, 3000, 'Fass', 'Vome', '🟧', '🟦')
-};
+let worldsData;
 
-// 創建世界資料的函數
-function createWorldData(name, startTime, loopTime, dayTime, nightTime, dayStatusName, nightStatusName, dayIcon, nightIcon) {
-    return {
-        name,
-        startTime,
-        loopTime,
-        dayTime,
-        nightTime,
-        dayStatusName,
-        nightStatusName,
-        dayIcon,
-        nightIcon
-    };
+// 獲取用戶時區
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// 初始化
+async function init() {
+    try {
+        const response = await fetch('world_cycles.json');
+        const data = await response.json();
+        worldsData = data.worlds;
+
+        generateCards(worldsData);
+        updateAllCycles();
+        setInterval(updateAllCycles, 1000);
+    } catch (error) {
+        console.error('初始化失敗', error);
+    }
 }
 
-// 更新單個世界的循環狀態
-function updateCycle(worldKey) {
-    const world = worlds[worldKey];
+// 動態生成卡片
+function generateCards(worlds) {
+    const container = document.getElementById('card-container');
+    container.innerHTML = ''; // 清空容器，避免重複渲染
+    for (const [key, world] of Object.entries(worlds)) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.bsToggle = 'modal';
+        card.dataset.bsTarget = '#timeModal';
+        card.dataset.world = key;
+
+        card.innerHTML = `
+            <div class="card-body">
+                <div>
+                    <p class="card-text">${world.name} - <span id="status-${key}"></span></p>
+                    <p class="time-left">距離 <span id="next-cycle-${key}" class="badge bg-primary"></span> 還有 <span id="output-${key}" class="badge bg-secondary"></span></p>
+                </div>
+                <div id="status-icon-${key}" class="status-icon"></div>
+            </div>
+        `;
+        container.appendChild(card);
+    }
+}
+
+// 更新所有世界的循環
+function updateAllCycles() {
+    for (const [key, world] of Object.entries(worldsData)) {
+        updateCycle(key, world);
+    }
+
+    const currentTimeElement = document.getElementById('current-time');
+    if (currentTimeElement) {
+        // 計算用戶的時區偏移量
+        const timeZoneOffset = new Date().toLocaleString('en-US', { timeZoneName: 'short' }).split(' ').pop(); // 取得像是 "UTC+8" 或 "GMT+8" 的字串
+        currentTimeElement.textContent = '現在時間：' + dayjs().tz(userTimeZone).format('YYYY/MM/DD HH:mm:ss ') + `(${timeZoneOffset})`;
+    }
+}
+
+
+// 更新個別世界的循環
+function updateCycle(worldKey, world) {
     const { status, nextCycle, timeLeft, icon } = calculateCycleData(world);
 
-    // DOM 操作
-    document.getElementById(`status-${worldKey}`).textContent = status;
-    document.getElementById(`next-cycle-${worldKey}`).textContent = nextCycle;
-    document.getElementById(`output-${worldKey}`).textContent = timeLeft;
-    document.getElementById(`status-icon-${worldKey}`).textContent = icon;
+    const statusElement = document.getElementById(`status-${worldKey}`);
+    const nextCycleElement = document.getElementById(`next-cycle-${worldKey}`);
+    const outputElement = document.getElementById(`output-${worldKey}`);
+    const statusIconElement = document.getElementById(`status-icon-${worldKey}`);
+
+    if (statusElement && nextCycleElement && outputElement && statusIconElement) {
+        statusElement.textContent = status;
+        nextCycleElement.textContent = nextCycle;
+        outputElement.textContent = timeLeft;
+        statusIconElement.textContent = icon;
+
+        // 根據日夜狀態決定顏色
+        nextCycleElement.classList.add("badge", getStatusColors(status, world), "text-dark"); 
+        outputElement.classList.add("badge", "bg-light", "text-dark"); 
+    }
 }
 
-// 計算世界循環資料
+// 根據 status 和 world 動態設置顏色
+function getStatusColors(status, world) {
+    let nextCycleColor
+
+    // 判斷當前狀態是日間還是夜晚
+    if (status === world.dayStatusName) {
+        // 如果是日間，顯示對應的顏色
+        nextCycleColor = "bg-info"; // 藍色，因為距離[夜晚]
+    } else {
+        // 如果是夜晚，顯示對應的顏色
+        nextCycleColor = "bg-warning"; // 黃色，因為距離[白晝]
+    }
+
+    return nextCycleColor;
+}
+
+// 計算世界的循環資料
 function calculateCycleData(world) {
-    const currentTime = dayjs.utc(); // 使用UTC时间
-    const startTime = dayjs.utc(world.startTime); // 解析为UTC时间
-    const timeElapsed = currentTime.diff(startTime, 'second');
+    const now = dayjs.utc();
+    const startTime = dayjs.utc(world.startTime);
+    const timeElapsed = now.diff(startTime, 'second');
     const timeInCycle = timeElapsed % world.loopTime;
 
     let status, nextCycle, icon, timeLeft;
@@ -58,189 +119,189 @@ function calculateCycleData(world) {
         timeLeft = world.loopTime - timeInCycle;
     }
 
-    const timeLeftFormatted = formatTimeLeft(timeLeft);
-    return { status, nextCycle, timeLeft: timeLeftFormatted, icon };
+    return { status, nextCycle, timeLeft: formatTimeLeft(timeLeft), icon };
 }
 
-// 格式化剩餘時間
-function formatTimeLeft(timeLeft) {
-    const hours = Math.floor(timeLeft / 3600);
-    const minutes = Math.floor((timeLeft % 3600) / 60);
-    return hours > 0 ? `${hours} 小時 ${minutes} 分` : `${minutes} 分`;
-}
+// 剩餘時間做格式
+function formatTimeLeft(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
 
-// 更新所有世界的循環
-function updateAllCycles() {
-    for (let worldKey in worlds) {
-        updateCycle(worldKey);
+    if (hours > 0) {
+        return `${hours} 小時 ${minutes} 分 ${secs} 秒`;
+    } else if (minutes > 0) {
+        return `${minutes} 分 ${secs} 秒`;
+    } else {
+        return `${secs} 秒`;
     }
-    document.getElementById('current-time').textContent = '現在時間：' + dayjs().tz("Asia/Taipei").format('YYYY/MM/DD HH:mm');
 }
 
-// 顯示模態框的時候
-var timeModal = document.getElementById('timeModal');
-timeModal.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget;
-    var worldKey = button.getAttribute('data-world');
-    showModal(worldKey);
-});
+// 設定循環狀態
+function assignCycleStatuses(filteredCycles, now) {
+    let hasOngoing = false;
+    let nextIndex = -1;
 
-// 顯示模態框內容
-function showModal(worldKey) {
-    const world = worlds[worldKey];
-    document.getElementById('modal-world-name').textContent = world.name;
-    document.getElementById('modal-day-title').textContent = world.dayStatusName;
-    document.getElementById('modal-night-title').textContent = world.nightStatusName;
+    // 第一遍判斷進行中與已結束
+    filteredCycles.forEach((cycle, index) => {
+        if (now.isBetween(cycle.start, cycle.end)) {
+            cycle.statusClass = "status-ongoing";
+            hasOngoing = true;
+            nextIndex = index + 1; // 設置下一個循環的索引
+        } else if (now.isAfter(cycle.end)) {
+            cycle.statusClass = "status-ended";
+        } else {
+            cycle.statusClass = "status-not-started";
+        }
+    });
 
-    const modalContentBody = document.getElementById('modal-content-body');
-    modalContentBody.innerHTML = ''; // 清空舊內容
+    // 第二遍設定下一個循環
+    if (hasOngoing && nextIndex < filteredCycles.length) {
+        filteredCycles[nextIndex].statusClass = "status-next";
+    } else if (!hasOngoing) {
+        // 如果沒有進行中的項目，選擇當前時間最近的未開始循環
+        const nextCycle = filteredCycles.find(cycle => now.isBefore(cycle.start));
+        if (nextCycle) {
+            nextCycle.statusClass = "status-next";
+        }
+    }
 
-    const cycles = calculateCyclesForModal(world);
-    renderModalContent(cycles, modalContentBody, world);
+    return filteredCycles;
 }
 
-// 計算要顯示的循環時間
+// 計算模態框所需的循環資料
 function calculateCyclesForModal(world) {
-    const now = dayjs.utc(); // 使用UTC时间
-    const todayStart = now.startOf('day');
-    const tomorrowStart = todayStart.add(1, 'day');
-    const endOfTomorrow = tomorrowStart.add(1, 'day');
-
-    const startTime = dayjs.utc(world.startTime); // 解析为UTC时间
-    const timeElapsedSinceStart = todayStart.diff(startTime, 'second');
-    const cyclesElapsed = Math.floor(timeElapsedSinceStart / world.loopTime);
-    let timePointer = startTime.add(cyclesElapsed * world.loopTime, 'second');
+    const now = dayjs.utc();
+    const startTime = dayjs.utc(world.startTime);
+    const yesterdayStart = now.startOf('day').subtract(1, 'day');
+    const tomorrowEnd = now.startOf('day').add(2, 'day').endOf('day');
 
     const cycles = [];
-    while (timePointer.isBefore(endOfTomorrow)) {
-        const cycleStart = timePointer.clone();
-        const cycleEnd = cycleStart.add(world.loopTime, 'second');
+    let timePointer = startTime;
 
-        // 收集今天和明天的循环
-        if (cycleEnd.isAfter(todayStart) && cycleStart.isBefore(endOfTomorrow)) {
-            cycles.push({ start: cycleStart.clone(), end: cycleEnd.clone() });
+    while (timePointer.isBefore(tomorrowEnd)) {
+        const dayStart = timePointer;
+        const nightStart = dayStart.add(world.dayTime, 'second');
+        const nextCycleStart = dayStart.add(world.loopTime, 'second');
+
+        if (dayStart.isBetween(yesterdayStart, tomorrowEnd, null, '[)')) {
+            cycles.push({ start: dayStart, end: nightStart, status: world.dayStatusName });
+        }
+        if (nightStart.isBetween(yesterdayStart, tomorrowEnd, null, '[)')) {
+            cycles.push({ start: nightStart, end: nextCycleStart, status: world.nightStatusName });
         }
 
-        // 移动到下一个循环
-        timePointer = timePointer.add(world.loopTime, 'second');
+        timePointer = nextCycleStart;
     }
 
     return cycles;
 }
 
-
-// 渲染模態框內容
-function renderModalContent(cycles, modalContentBody, world) {
-    let isNext = true;
-
-    // 顯示今天的循環
-    const todayStart = dayjs().tz("Asia/Taipei").startOf('day');
-    const tomorrowStart = dayjs().tz("Asia/Taipei").add(1, 'day').startOf('day');
-    isNext = appendScheduleForDay(cycles, todayStart, tomorrowStart, modalContentBody, world, isNext);
-
-    // 顯示明天的循環
-    const endOfTomorrow = tomorrowStart.add(1, 'day');
-    isNext = appendScheduleForDay(cycles, tomorrowStart, endOfTomorrow, modalContentBody, world, isNext);
+// 過濾出當天與隔天的循環數據，因為我們是算4天的循環(但最第一天和最後一天只有半天來當作預算的，所以需要切出中間需求的兩天)
+function filterCyclesForDisplay(cycles, todayStart, tomorrowStart) {
+    return cycles.filter(cycle => {
+        const cycleStart = cycle.start.tz(userTimeZone);
+        return cycleStart.isSame(todayStart, 'day') || cycleStart.isSame(tomorrowStart, 'day');
+    });
 }
 
-// 為模態框添加循環內容
-function appendScheduleForDay(cycles, dayStart, dayEnd, modalContentBody, world, isNext) {
-    const scheduleDate = document.createElement('div');
-    scheduleDate.className = 'schedule-date';
-    scheduleDate.textContent = dayStart.format('M/D');
-    modalContentBody.appendChild(scheduleDate);
+// 創建白天和夜晚的容器
+function createDayNightContainers(parentElement, date) {
+    const dateHeader = document.createElement('div');
+    dateHeader.className = 'schedule-date';
+    dateHeader.textContent = date;
+    parentElement.appendChild(dateHeader);
 
-    cycles.forEach(cycle => {
-        if (cycle.start.isAfter(dayStart) && cycle.start.isBefore(dayEnd)) {
-            const scheduleItem = document.createElement('div');
-            scheduleItem.className = 'schedule-item';
+    const dayNightRow = document.createElement('div');
+    dayNightRow.className = 'day-night-row';
 
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'schedule-period';
-            dayDiv.style.width = '48%';
+    const dayContainer = document.createElement('div');
+    dayContainer.className = 'day-container';
+    dayNightRow.appendChild(dayContainer);
 
-            const nightDiv = document.createElement('div');
-            nightDiv.className = 'schedule-period';
-            nightDiv.style.width = '48%';
+    const nightContainer = document.createElement('div');
+    nightContainer.className = 'night-container';
+    dayNightRow.appendChild(nightContainer);
 
-            let dayStartTime = cycle.start.clone();
-            let dayEndTime = dayStartTime.add(world.dayTime, 'second');
-            const dayResult = createScheduleItem(dayStartTime, dayEndTime, world.dayStatusName, isNext);
-            dayDiv.appendChild(dayResult.element);
+    parentElement.appendChild(dayNightRow);
 
-            // 处理夜晚段
-            let nightStartTime = dayEndTime.clone();
-            let nightEndTime = nightStartTime.add(world.nightTime, 'second');
-            const nightResult = createScheduleItem(nightStartTime, nightEndTime, world.nightStatusName, isNext);
-            nightDiv.appendChild(nightResult.element);
+    return { dayContainer, nightContainer };
+}
 
-            // 更新 isNext
-            if (dayResult.status === '進行中' || nightResult.status === '進行中') {
-                isNext = false;
-            } else if ((dayResult.status === '尚未開始' || nightResult.status === '尚未開始') && isNext) {
-                dayResult.element.querySelector('.status-label').textContent = '下一個';
-                dayResult.element.querySelector('.status-label').classList.add('status-next');
-                nightResult.element.querySelector('.status-label').textContent = '下一個';
-                nightResult.element.querySelector('.status-label').classList.add('status-next');
-                isNext = false;
-            }
+// 更新模態框的標題
+function updateModalHeader(world) {
+    const modalWorldName = document.getElementById('modal-world-name');
+    const modalDayTitle = document.getElementById('modal-day-title');
+    const modalNightTitle = document.getElementById('modal-night-title');
 
-            scheduleItem.appendChild(dayDiv);
-            scheduleItem.appendChild(nightDiv);
-            modalContentBody.appendChild(scheduleItem);
+    if (modalWorldName && modalDayTitle && modalNightTitle) {
+        modalWorldName.textContent = world.name || "未知世界"; // 空資料
+        modalDayTitle.textContent = world.dayStatusName || "白晝";
+        modalNightTitle.textContent = world.nightStatusName || "夜晚";
+    }
+}
+
+// 渲染模態框的內容
+function renderModalContent(filteredCycles, modalContentBody, world) {
+    const now = dayjs().tz(userTimeZone);
+    const updatedCycles = assignCycleStatuses(filteredCycles, now);
+
+    let currentDay = null;
+    let dayContainer = null;
+    let nightContainer = null;
+
+    updatedCycles.forEach(cycle => {
+        const cycleDay = cycle.start.tz(userTimeZone).format('YYYY/MM/DD');
+
+        if (currentDay !== cycleDay) {
+            const containers = createDayNightContainers(modalContentBody, cycleDay);
+            dayContainer = containers.dayContainer;
+            nightContainer = containers.nightContainer;
+            currentDay = cycleDay;
+        }
+
+        const cycleItem = document.createElement('div');
+        cycleItem.className = `cycle-item ${cycle.statusClass}`;
+        cycleItem.textContent = `${cycle.start.tz(userTimeZone).format('HH:mm')} ~ ${cycle.end.tz(userTimeZone).format('HH:mm')}`;
+
+        if (cycle.status === world.dayStatusName) {
+            dayContainer.appendChild(cycleItem);
+        } else {
+            nightContainer.appendChild(cycleItem);
         }
     });
-
-    return isNext
 }
 
-function createScheduleItem(startTime, endTime, statusName, isNext) {
-    const currentTime = dayjs.utc();
+// 顯示模態框內容
+function showModal(worldKey) {
+    const world = worldsData[worldKey];
+    if (!world) return;
 
-    const div = document.createElement('div');
+    // 更新模態框標題
+    updateModalHeader(world);
 
-    const timeDiv = document.createElement('div');
-    timeDiv.className = 'schedule-time';
-    timeDiv.textContent = startTime.tz("Asia/Taipei").format('HH:mm') + ' - ' + endTime.tz("Asia/Taipei").format('HH:mm');
+    // 清空模態框內容
+    const modalContentBody = document.getElementById('modal-content-body');
+    modalContentBody.innerHTML = '';
 
-    const statusLabel = document.createElement('div');
-    statusLabel.className = 'status-label';
+    // 計算並過濾循環數據
+    const cycles = calculateCyclesForModal(world);
+    const now = dayjs().tz(userTimeZone);
+    const todayStart = now.startOf('day');
+    const tomorrowStart = todayStart.add(1, 'day');
+    const filteredCycles = filterCyclesForDisplay(cycles, todayStart, tomorrowStart);
 
-    let status = '';
-
-    // 判斷當前時間與這段時間的關係
-    if (currentTime.isBefore(startTime)) {
-        if (isNext) {
-            // 標記為「下一個」
-            statusLabel.textContent = '下一個';
-            statusLabel.classList.add('status-next');
-            status = '下一個';
-        } else {
-            // 尚未開始
-            statusLabel.textContent = '尚未開始';
-            statusLabel.classList.add('status-upcoming');
-            status = '尚未開始';
-        }
-    } else if (currentTime.isAfter(endTime)) {
-        // 已結束
-        statusLabel.textContent = '已結束';
-        statusLabel.classList.add('status-ended');
-        status = '已結束';
-    } else {
-        // 進行中
-        statusLabel.textContent = '進行中';
-        statusLabel.classList.add('status-ongoing');
-        status = '進行中';
-    }
-
-    div.appendChild(timeDiv);
-    div.appendChild(statusLabel);
-
-    return { element: div, status }; // 回傳狀態
+    // 渲染模態框內容
+    renderModalContent(filteredCycles, modalContentBody, world);
 }
 
-// 確保網頁載入完成後馬上更新一次，然後每分鐘更新時間
-window.onload = function () {
-    updateAllCycles();
-    setInterval(updateAllCycles, 60000); // 每分鐘更新一次
-};
+// 模態框打開事件
+const timeModal = document.getElementById('timeModal');
+timeModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const worldKey = button.getAttribute('data-world');
+    showModal(worldKey);
+});
+
+// 初始化
+init();
