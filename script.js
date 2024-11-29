@@ -2,7 +2,8 @@ dayjs.extend(dayjs_plugin_utc);
 dayjs.extend(dayjs_plugin_timezone);
 dayjs.extend(dayjs_plugin_isBetween);
 
-let worldsData;
+let worldsData; // 世界資料
+let currentModalWorldKey = null; // 記錄當前模態框對應的世界
 
 // 獲取用戶時區
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -70,6 +71,30 @@ function updateCycle(worldKey, world) {
     const outputElement = document.getElementById(`output-${worldKey}`);
     const statusIconElement = document.getElementById(`status-icon-${worldKey}`);
 
+    // 追蹤上次狀態
+    if (!world.previousStatus) {
+        world.previousStatus = status; // 初始化上次狀態
+    }
+
+    // 若狀態變化，且模態框為當前世界，觸發更新
+    if (world.previousStatus !== status) {
+        world.previousStatus = status; // 更新上次狀態
+
+        if (currentModalWorldKey === worldKey) {
+            const modalContentBody = document.getElementById('modal-content-body');
+            modalContentBody.innerHTML = ''; // 清空內容
+
+            const cycles = calculateCyclesForModal(world);
+            const now = dayjs().tz(userTimeZone);
+            const todayStart = now.startOf('day');
+            const tomorrowStart = todayStart.add(1, 'day');
+            const filteredCycles = filterCyclesForDisplay(cycles, todayStart, tomorrowStart);
+
+            renderModalContent(filteredCycles, modalContentBody, world); // 渲染更新後的模態框
+        }
+    }
+
+    // 更新卡片內容
     if (statusElement && nextCycleElement && outputElement && statusIconElement) {
         statusElement.textContent = status;
         nextCycleElement.textContent = nextCycle;
@@ -77,11 +102,10 @@ function updateCycle(worldKey, world) {
         statusIconElement.textContent = icon;
 
         // 根據日夜狀態決定顏色
-        nextCycleElement.classList.add("badge", getStatusColors(status, world), "text-dark"); 
-        outputElement.classList.add("badge", "bg-light", "text-dark"); 
+        nextCycleElement.classList.add("badge", getStatusColors(status, world), "text-dark");
+        outputElement.classList.add("badge", "bg-light", "text-dark");
     }
 }
-
 // 根據 status 和 world 動態設置顏色
 function getStatusColors(status, world) {
     let nextCycleColor
@@ -277,6 +301,8 @@ function showModal(worldKey) {
     const world = worldsData[worldKey];
     if (!world) return;
 
+    currentModalWorldKey = worldKey; // 記錄當前模態框的世界
+
     // 更新模態框標題
     updateModalHeader(world);
 
@@ -302,6 +328,10 @@ timeModal.addEventListener('show.bs.modal', function (event) {
     const worldKey = button.getAttribute('data-world');
     showModal(worldKey);
 });
+timeModal.addEventListener('hidden.bs.modal', function () {
+    currentModalWorldKey = null; // 清空當前模態框的世界記錄
+});
+
 
 // 初始化
 init();
