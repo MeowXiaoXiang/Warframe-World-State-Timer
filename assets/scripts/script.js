@@ -11,7 +11,7 @@ const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 // 初始化
 async function init() {
     try {
-        const response = await fetch('world_cycles.json');
+        const response = await fetch('data/world_cycles.json');
         const data = await response.json();
         worldsData = data.worlds;
 
@@ -54,10 +54,16 @@ function updateAllCycles() {
     }
 
     const currentTimeElement = document.getElementById('current-time');
+    const currentTimezoneElement = document.getElementById('current-timezone');
+
     if (currentTimeElement) {
-        // 計算用戶的時區偏移量
-        const timeZoneOffset = new Date().toLocaleString('en-US', { timeZoneName: 'short' }).split(' ').pop(); // 取得像是 "UTC+8" 或 "GMT+8" 的字串
-        currentTimeElement.textContent = '現在時間：' + dayjs().tz(userTimeZone).format('YYYY/MM/DD HH:mm:ss ') + `(${timeZoneOffset})`;
+        const currentTime = dayjs().tz(userTimeZone).format('YYYY/MM/DD HH:mm:ss');
+        currentTimeElement.textContent = `現在時間：${currentTime}`;
+    }
+
+    if (currentTimezoneElement) {
+        const timeZoneOffset = new Date().toLocaleString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+        currentTimezoneElement.textContent = `時區：${userTimeZone} (${timeZoneOffset})`;
     }
 }
 

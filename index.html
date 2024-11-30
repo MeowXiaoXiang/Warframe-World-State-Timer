@@ -11,8 +11,8 @@
     <meta property="og:image" content="https://meowxiaoxiang.github.io/Warframe-World-State-Timer/cycle_icon.png" />
     <meta property="og:url" content="https://meowxiaoxiang.github.io/Warframe-World-State-Timer/" />
     <meta property="og:type" content="website" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="assets/styles/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/style.css">
     <!-- Favicon -->
     <link rel="icon" href="cycle_icon.svg" type="image/svg+xml">
 </head>
@@ -20,6 +20,7 @@
 <body>
     <div id="card-container" class="container mt-5"></div>
     <p id="current-time" style="text-align: center; color: gray;"></p>
+    <p id="current-timezone" style="text-align: center; color: gray;"></p>
     <!-- 模態框 -->
     <div class="modal fade" id="timeModal" tabindex="-1" aria-labelledby="timeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -44,12 +45,12 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isBetween.js"></script>
-    <script src="script.js"></script>
+    <script src="assets/scripts/bootstrap.bundle.min.js"></script>
+    <script src="assets/scripts/dayjs/dayjs.min.js"></script>
+    <script src="assets/scripts/dayjs/plugin/utc.js"></script>
+    <script src="assets/scripts/dayjs/plugin/timezone.js"></script>
+    <script src="assets/scripts/dayjs/plugin/isBetween.js"></script>
+    <script src="assets/scripts/script.js"></script>
     <footer class="bg-light text-center text-muted py-2" style="position: fixed; bottom: 0; left: 0; right: 0; box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);">
         <div class="container">
             <p class="mb-1" style="font-size: 0.9rem;">Copyright © 2024 XiaoXiang_Meow.</p>
