@@ -41,3 +41,9 @@ coverage/
 *.gz
 *.br
 *.svg.zip
+
+# Dependency directories
+node_modules/
+
+# Dist directory (generated during build)
+dist/
