@@ -6,11 +6,6 @@ yarn-debug.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependency directories
-node_modules/
-dist/
-dist-ssr/
-
 # Local environment files
 .env
 .env.local
@@ -20,6 +15,7 @@ dist-ssr/
 .vite/
 .webpack/
 .cache/
+.parcel-cache/
 .eslintcache
 .prettiercache
 
