@@ -1,0 +1,20 @@
+/* === 定義主題變數 === */
+:root {
+  --background-color: #f4f4f9;
+  --text-color: #333;
+  --card-background: #ffffff; /* 卡片預設背景色 */
+}
+
+[data-theme="dark"] {
+  --background-color: #333;
+  --text-color: #f4f4f9;
+  --card-background: #444; /* 卡片在深色模式的背景色 */
+}
+
+
+/* === 使用變數設置樣式 === */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}

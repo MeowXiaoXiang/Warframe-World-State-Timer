@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warframe 世界循環時間</title>
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Warframe 世界循環時間" />
+    <meta property="og:description" content="一個專為 Warframe 玩家打造的世界循環追蹤工具，提供簡潔的視覺化界面，協助玩家掌握預期的循環時間與狀態。" />
+    <meta property="og:image" content="https://meowxiaoxiang.github.io/Warframe-World-State-Timer/cycle_icon.png" />
+    <meta property="og:url" content="https://meowxiaoxiang.github.io/Warframe-World-State-Timer/" />
+    <meta property="og:type" content="website" />
+    <link href="assets/styles/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <!-- Favicon -->
+    <link rel="icon" href="cycle_icon.svg" type="image/svg+xml">
+</head>
+
+<body>
+    <div id="card-container" class="container mt-5"></div>
+    <p id="current-time" style="text-align: center; color: gray;"></p>
+    <p id="current-timezone" style="text-align: center; color: gray;"></p>
+    <!-- 模態框 -->
+    <div class="modal fade" id="timeModal" tabindex="-1" aria-labelledby="timeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">世界循環時間表 - <span id="modal-world-name"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-legend">
+                    <span class="legend-item status-not-started">尚未開始</span>
+                    <span class="legend-item status-next">下一個</span>
+                    <span class="legend-item status-ongoing">進行中</span>
+                    <span class="legend-item status-ended">已結束</span>
+                </div>
+                <div class="modal-subheader">
+                    <div id="modal-day-title" class="modal-subtitle">白晝</div>
+                    <div id="modal-night-title" class="modal-subtitle">夜晚</div>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-content-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="assets/scripts/bootstrap.bundle.min.js"></script>
+    <script src="assets/scripts/dayjs/dayjs.min.js"></script>
+    <script src="assets/scripts/dayjs/plugin/utc.js"></script>
+    <script src="assets/scripts/dayjs/plugin/timezone.js"></script>
+    <script src="assets/scripts/dayjs/plugin/isBetween.js"></script>
+    <script src="assets/scripts/script.js"></script>
+    <footer class="bg-light text-center text-muted py-2" style="position: fixed; bottom: 0; left: 0; right: 0; box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);">
+        <div class="container">
+            <p class="mb-1" style="font-size: 0.9rem;">Copyright © 2024 XiaoXiang_Meow.</p>
+        </div>
+    </footer>    
+</body>
+</html>

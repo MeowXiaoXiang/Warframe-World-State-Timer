@@ -1,0 +1,26 @@
+{
+    "app": {
+        "currentTime": "Current Time",
+        "timezone": "TimeZone"
+    },
+    "time": {
+        "hours": "h",
+        "minutes": "m",
+        "seconds": "s"
+    },
+    "card": {
+        "timeLeftMessage": {
+            "prefix": "",
+            "suffix": "in"
+        }
+    },
+    "modal": {
+        "title": "World Cycle Schedule",
+        "legend": {
+            "notStarted": "Not Started",
+            "next": "Next",
+            "ongoing": "Ongoing",
+            "ended": "Ended"
+        }
+    }
+}

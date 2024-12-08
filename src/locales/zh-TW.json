@@ -1,0 +1,26 @@
+{
+    "app": {
+        "currentTime": "現在時間",
+        "timezone": "時區"
+    },
+    "time": {
+        "hours": "小時",
+        "minutes": "分",
+        "seconds": "秒"
+    },
+    "card": {
+        "timeLeftMessage": {
+            "prefix": "距離",
+            "suffix": "還有"
+        }
+    },
+    "modal": {
+        "title": "世界循環時間表",
+        "legend": {
+            "notStarted": "尚未開始",
+            "next": "下一個",
+            "ongoing": "進行中",
+            "ended": "已結束"
+        }
+    }
+}

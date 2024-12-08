@@ -1,0 +1,34 @@
+name: Deploy to GitHub Pages
+
+on:
+    push:
+        branches:
+            - master # 修改為你的主分支名稱
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install yarn
+              run: npm install -g yarn # 將 Yarn 裝起來
+
+            - name: Install dependencies
+              run: yarn install # 利用 Yarn 將依賴項等等進行安裝
+
+            - name: Build project
+              run: yarn build # 使用 Yarn 進行 Build
+
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
