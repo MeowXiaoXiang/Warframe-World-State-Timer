@@ -1,0 +1,60 @@
+{
+    "worlds": {
+        "earth": {
+            "name_zh-TW": "地球森林",
+            "name_en-US": "Earth Forest",
+            "startTime": "2015-12-03T00:00:00Z",
+            "loopTime": 28800,
+            "dayTime": 14400,
+            "nightTime": 14400,
+            "dayStatusName_zh-TW": "白晝",
+            "dayStatusName_en-US": "Day",
+            "nightStatusName_zh-TW": "夜晚",
+            "nightStatusName_en-US": "Night",
+            "dayIcon": "☀️",
+            "nightIcon": "🌙"
+        },
+        "plains": {
+            "name_zh-TW": "夜靈平原",
+            "name_en-US": "Plains of Eidolon",
+            "startTime": "2021-02-05T12:27:54Z",
+            "loopTime": 8998.874,
+            "dayTime": 5998.874,
+            "nightTime": 3000,
+            "dayStatusName_zh-TW": "白晝",
+            "dayStatusName_en-US": "Day",
+            "nightStatusName_zh-TW": "夜晚",
+            "nightStatusName_en-US": "Night",
+            "dayIcon": "☀️",
+            "nightIcon": "🌙"
+        },
+        "orb": {
+            "name_zh-TW": "奧布山谷",
+            "name_en-US": "Orb Vallis",
+            "startTime": "2021-01-09T08:13:48Z",
+            "loopTime": 1600,
+            "dayTime": 400,
+            "nightTime": 1200,
+            "dayStatusName_zh-TW": "溫暖",
+            "dayStatusName_en-US": "Warm",
+            "nightStatusName_zh-TW": "寒冷",
+            "nightStatusName_en-US": "Cold",
+            "dayIcon": "🔥",
+            "nightIcon": "❄️"
+        },
+        "cambion": {
+            "name_zh-TW": "魔裔禁地",
+            "name_en-US": "Cambion Drift",
+            "startTime": "2021-02-05T12:27:54Z",
+            "loopTime": 8998.874,
+            "dayTime": 5998.874,
+            "nightTime": 3000,
+            "dayStatusName_zh-TW": "Fass",
+            "dayStatusName_en-US": "Fass",
+            "nightStatusName_zh-TW": "Vome",
+            "nightStatusName_en-US": "Vome",
+            "dayIcon": "🟧",
+            "nightIcon": "🟦"
+        }
+    }
+}
