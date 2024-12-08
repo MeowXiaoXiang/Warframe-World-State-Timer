@@ -78,7 +78,7 @@ const transformWorldData = (locale) => {
 
 // 從 JSON 獲取世界資料（僅讀取一次）
 const fetchWorldsData = async () => {
-	const response = await fetch("/data/world_cycles.json");
+	const response = await fetch("./data/world_cycles.json");
 	rawWorldData.value = await response.json(); // 存原始資料
 	worlds.value = transformWorldData(locale.value); // 初始化為當前語言
 };
