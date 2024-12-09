@@ -11,29 +11,31 @@
                     <span :class="isDarkTheme ? 'text-light' : 'text-dark'">
                         {{ t("card.timeLeftMessage.prefix") }}
                     </span>
-                    <span
-                        :class="[
-                            'badge',
-                            nextCycle === world.dayStatusName ? 'bg-warning' : 'bg-info',
-                            isDarkTheme ? 'text-light' : 'text-dark'
-                        ]"
-                    >
+                    <span :class="[
+                        'badge',
+                        nextCycle === world.dayStatusName ? 'bg-warning' : 'bg-info',
+                        isDarkTheme ? 'text-light' : 'text-dark'
+                    ]">
                         {{ nextCycle }}
                     </span>
                     <span :class="isDarkTheme ? 'text-light' : 'text-dark'">
                         {{ t("card.timeLeftMessage.suffix") }}
                     </span>
-                    <span
-                        class="badge"
-                        :class="isDarkTheme ? 'bg-secondary text-light' : 'bg-light text-dark'"
-                    >
+                    <span class="badge" :class="isDarkTheme ? 'bg-secondary text-light' : 'bg-light text-dark'">
                         {{ timeLeft }}
                     </span>
                 </p>
             </div>
             <!-- 狀態圖標 -->
             <div class="status-icon">
-                <span>{{ icon }}</span>
+                <template v-if="isImage(icon)">
+                    <!-- 圖片類型 -->
+                    <img :src="icon" :alt="world.name" class="icon-image" :class="{ 'svg-icon': isSvg(icon) }" />
+                </template>
+                <template v-else>
+                    <!-- Emoji 或 Unicode -->
+                    <span>{{ icon }}</span>
+                </template>
             </div>
         </div>
     </div>
@@ -52,6 +54,24 @@ defineProps({
     timeLeft: { type: String, default: null },
     icon: { type: String, default: "❓" },
 });
+
+/**
+ * 判斷是否是圖片路徑（根據後綴名）
+ * @param {string} icon
+ * @returns {boolean} 是否為圖片
+ */
+const isImage = (icon) => {
+    return /\.(svg|png|jpg|jpeg|gif)$/i.test(icon);
+};
+
+/**
+ * 判斷是否是 SVG 圖片
+ * @param {string} icon
+ * @returns {boolean} 是否為 SVG
+ */
+const isSvg = (icon) => {
+    return /\.svg$/i.test(icon);
+};
 </script>
 
 <style scoped>
@@ -119,6 +139,23 @@ defineProps({
     /* 狀態圖示的大小 */
     margin-left: 20px !important;
     /* 與文字的間距 */
+}
+
+.icon-image {
+    width: 70px; /* 圖片寬度 */
+    height: 70px; /* 圖片高度 */
+    object-fit: contain; /* 確保圖片縮放不變形 */
+}
+
+.svg-icon {
+        width: 60px;
+        height: 60px;
+        filter: invert(0); /* 預設顏色 */
+        transition: filter 0.3s ease;
+    }
+
+[data-theme="dark"] .svg-icon {
+    filter: invert(1); /* 在暗色主題時反轉顏色 */
 }
 
 /* === 自定義 Bootstrap badge 顏色覆蓋 === */

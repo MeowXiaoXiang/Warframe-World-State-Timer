@@ -54,7 +54,7 @@ const { locale } = useI18n();
 const switchLanguage = (lang) => {
 	locale.value = lang;
 	localStorage.setItem("locale", lang); // 儲存到 localStorage
-	console.log(`切換語言至：${lang}`);
+	console.debug(`切換語言至：${lang}`);
 };
 
 // 初始化下拉選單

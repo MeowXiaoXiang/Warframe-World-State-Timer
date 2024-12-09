@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" tabindex="-1" role="dialog" ref="modal" aria-hidden="true">
+    <div class="modal fade" tabindex="-1" role="dialog" ref="modal" :aria-hidden="!isVisible">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <!-- 標題 -->
@@ -7,7 +7,7 @@
                     <h5 class="modal-title">
                         {{ t("modal.title") }} - <span>{{ localWorld?.name }}</span>
                     </h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="closeModal"></button>
+                    <button type="button" class="btn-close" :class="{ 'btn-close-white': isDarkTheme }" aria-label="Close" @click="closeModal"></button>
                 </div>
                 <!-- 圖例 -->
                 <div class="modal-legend" :class="isDarkTheme ? 'bg-dark text-light' : 'bg-light text-dark'">
@@ -62,6 +62,7 @@ defineProps({
 
 // Ref & Variables
 const modal = ref(null);
+const isVisible = ref(false); // 是否顯示互動視窗
 let bootstrapModal = null;
 const localWorld = ref(null);
 const localGroupedCycles = ref({});
@@ -76,7 +77,8 @@ onMounted(() => {
 
         // 當模態框完全關閉時觸發清除
         modal.value.addEventListener("hidden.bs.modal", () => {
-            console.log("Modal completely closed, clearing local data...");
+            console.debug("Modal completely closed, clearing local data...");
+            isVisible.value = false;
             clearLocalData();
             emit("modal-closed"); // 通知父組件
         });
@@ -86,7 +88,7 @@ onMounted(() => {
 const clearLocalData = () => {
     localWorld.value = null;
     localGroupedCycles.value = {};
-    console.log("Local data cleared in Modal.vue.");
+    console.debug("Local data cleared in Modal.vue.");
 };
 
 // 更新分組數據
@@ -121,6 +123,7 @@ const openModal = (data) => {
         return;
     }
 
+    isVisible.value = true;
     // 更新資料僅當目標世界不同時
     if (!localWorld.value || localWorld.value.id !== data.world.id) {
         setWorldAndCycles(data.world);
@@ -142,7 +145,7 @@ const updateData = (world) => {
         return;
     }
 
-    console.log("Updating modal data...");
+    console.debug("Updating modal data...");
     setWorldAndCycles(world);
 };
 
@@ -150,6 +153,7 @@ const updateData = (world) => {
 // 關閉互動視窗
 const closeModal = () => {
     if (!bootstrapModal) return;
+    isVisible.value = false; // 設定不可見狀態
     bootstrapModal.hide(); // 只調用 Bootstrap 的隱藏方法
 };
 
@@ -242,22 +246,26 @@ defineExpose({
 
 /* 白天容器樣式 - 淺色模式 */
 .day-container {
-    background-color: #fff4e0; /* 柔和奶油色，更明亮的日間感覺 */
+    background-color: #fff4e0;
+    /* 柔和奶油色，更明亮的日間感覺 */
 }
 
 /* 夜晚容器樣式 - 淺色模式 */
 .night-container {
-    background-color: #e2eafc; /* 淡淡的天空藍，帶有一絲夜晚感 */
+    background-color: #e2eafc;
+    /* 淡淡的天空藍，帶有一絲夜晚感 */
 }
 
 /* 白天容器樣式 - 深色模式 */
 [data-theme="dark"] .day-container {
-    background-color: #aa7246; /* 柔和的琥珀棕色，適合作為深色模式的白天容器 */
+    background-color: #aa7246;
+    /* 柔和的琥珀棕色，適合作為深色模式的白天容器 */
 }
 
 /* 夜晚容器樣式 - 深色模式 */
 [data-theme="dark"] .night-container {
-    background-color: #24364e; /* 深海藍色，模擬夜晚的靜謐感 */
+    background-color: #24364e;
+    /* 深海藍色，模擬夜晚的靜謐感 */
 }
 
 
