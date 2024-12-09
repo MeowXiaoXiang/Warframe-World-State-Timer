@@ -17,7 +17,7 @@
         "plains": {
             "name_zh-TW": "夜靈平原",
             "name_en-US": "Plains of Eidolon",
-            "startTime": "2021-02-05T12:27:54Z",
+            "startTime": "2024-12-09T06:15:20Z",
             "loopTime": 8998.874,
             "dayTime": 5998.874,
             "nightTime": 3000,
@@ -53,8 +53,22 @@
             "dayStatusName_en-US": "Fass",
             "nightStatusName_zh-TW": "Vome",
             "nightStatusName_en-US": "Vome",
-            "dayIcon": "🟧",
-            "nightIcon": "🟦"
+            "dayIcon": "./images/factions/fass.png",
+            "nightIcon": "./images/factions/vome.png"
+        },
+        "zariman":{
+            "name_zh-TW": "扎日曼號",
+            "name_en-US": "Zariman Ten Zero",
+            "startTime": "2024-12-09T03:45:20Z",
+            "loopTime": 18000,
+            "dayTime": 9000,
+            "nightTime": 9000,
+            "dayStatusName_zh-TW": "Grineer",
+            "dayStatusName_en-US": "Grineer",
+            "nightStatusName_zh-TW": "Corpus",
+            "nightStatusName_en-US": "Corpus",
+            "dayIcon": "./images/factions/grineer.svg",
+            "nightIcon": "./images/factions/corpus.svg"
         }
     }
 }
