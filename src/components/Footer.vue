@@ -19,7 +19,7 @@ import { isDarkTheme } from "../utils/themeManager";
 
 <style scoped>
 .footer {
-    position: fixed;
+    position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
