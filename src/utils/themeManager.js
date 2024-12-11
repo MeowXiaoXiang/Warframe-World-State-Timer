@@ -1,7 +1,7 @@
 import { ref, computed, watchEffect } from "vue";
 
 // 響應式主題狀態
-const theme = ref(localStorage.getItem("theme") || "light");
+const theme = ref(localStorage.getItem("theme") || "dark");
 
 // 切換主題
 const toggleTheme = () => {
