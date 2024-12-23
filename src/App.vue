@@ -156,6 +156,7 @@ onMounted(async () => {
 <style scoped>
 #main-content {
 	opacity: 0;
+	padding-bottom: 60px;
 	transition: opacity 1s ease-in-out;
 }
 
