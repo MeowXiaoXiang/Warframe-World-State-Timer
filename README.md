@@ -1,6 +1,6 @@
 # Warframe 世界循環時間計算網站
 
-這是一個 **[Warframe 世界循環時間計算網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，專為 Warframe 玩家設計，提供即時準確的世界晝夜變化資訊。玩家可方便地查閱地球森林、夜靈平原、奧布山谷和魔裔禁地的當前狀態，以及下一次晝夜變換的預期時間，協助規劃遊戲內活動。
+這是一個 **[Warframe 世界循環時間計算網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，專為 Warframe 玩家設計，提供即時準確的世界晝夜變化資訊。玩家可方便地查閱地球森林、夜靈平原、奧布山谷、魔裔禁地和扎日曼號的世界循環狀態，以及下一次晝夜變換的預期時間，協助規劃遊戲內活動。
 
 ## 功能特色
 
