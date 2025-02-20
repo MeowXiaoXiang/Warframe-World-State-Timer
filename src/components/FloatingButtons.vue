@@ -73,25 +73,62 @@ onMounted(() => {
 .floating-container {
 	position: fixed;
 	/* 固定在頁面 */
-	bottom: 20px;
-	/* 距離底部 20px */
+	bottom: 55px;
+	/* 距離底部 55px */
 	right: 20px;
 	/* 距離右側 20px */
+	z-index: 1050;
+	/* 保持最上層顯示 */
 	display: flex;
 	/* 彈性佈局 */
 	gap: 10px;
 	/* 子項目間距 */
-	z-index: 1050;
-	/* 保證在最上層顯示 */
 	flex-direction: column;
 	/* 預設垂直排列 */
+	transition: all 0.3s ease-in-out;
+	/* 容器過渡動畫 */
 }
 
-@media (min-width: 768px) {
+@media (min-width: 585px) {
 	.floating-container {
-		flex-direction: row;
-		/* 螢幕較寬時改為水平排列 */
+		bottom: 18px;
+		/* 大於 585px 時距離底部調整到 20px */
 	}
+}
+
+/* === 🟢 當螢幕變寬 (>=720px) 時，變成水平模式 === */
+@media (min-width: 720px) {
+    /* 先讓按鈕動畫執行 */
+    .floating-container .dropdown {
+        animation: moveToHorizontal 0.3s ease-in-out forwards;
+    }
+}
+
+/* === 🟢 進入水平模式的動畫 === */
+@keyframes moveToHorizontal {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(-70px, 0); }
+	/* 先往左 */
+    100% { transform: translate(-70px, 70px); }
+	/* 再往下 */
+}
+
+/* === 🔴 當螢幕變窄 (<720px) 時，回到垂直模式 === */
+@media (max-width: 719px) {
+    /* 先讓語言按鈕執行回復動畫 */
+    .floating-container .dropdown {
+        animation: moveToVertical 0.3s ease-in-out forwards;
+    }
+}
+
+/* === 🔴 回到垂直模式的動畫 === */
+@keyframes moveToVertical {
+    0% { transform: translate(-70px, 70px); }
+	/* 這裡是 moveToHorizontal 最後的位置 */
+    50% { transform: translate(-70px, 0); }
+	/* 先往上 */
+    100% { transform: translate(0, 0); }
+	/* 回到原始位置 */
 }
 
 /* === 按鈕樣式 === */
