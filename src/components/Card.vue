@@ -13,10 +13,10 @@
                     </span>
                     <span :class="[
                         'badge',
-                        nextCycle === world.dayStatusName ? 'bg-warning' : 'bg-info',
+                        status === world.dayStatusName ? 'bg-warning' : 'bg-info',
                         isDarkTheme ? 'text-light' : 'text-dark'
                     ]">
-                        {{ nextCycle }}
+                        {{ status }}
                     </span>
                     <span :class="isDarkTheme ? 'text-light' : 'text-dark'">
                         {{ t("card.timeLeftMessage.suffix") }}

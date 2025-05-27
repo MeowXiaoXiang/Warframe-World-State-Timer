@@ -10,8 +10,8 @@
     },
     "card": {
         "timeLeftMessage": {
-            "prefix": "距離",
-            "suffix": "還有"
+            "prefix": "",
+            "suffix": "剩餘時間"
         }
     },
     "modal": {

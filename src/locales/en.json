@@ -11,7 +11,7 @@
     "card": {
         "timeLeftMessage": {
             "prefix": "",
-            "suffix": "in"
+            "suffix": "ends in"
         }
     },
     "modal": {
