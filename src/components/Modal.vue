@@ -258,16 +258,12 @@ defineExpose({
 
 /* 白天容器樣式 - 深色模式 */
 [data-theme="dark"] .day-container {
-    background-color: #aa7246;
-    /* 柔和的琥珀棕色，適合作為深色模式的白天容器 */
+    background-color: #29271f; /* 非常深的暖灰色，模擬被遮蔽的日光 */
 }
 
-/* 夜晚容器樣式 - 深色模式 */
 [data-theme="dark"] .night-container {
-    background-color: #24364e;
-    /* 深海藍色，模擬夜晚的靜謐感 */
+    background-color: #1e222b; /* 深邃的午夜藍，營造靜謐的夜晚氛圍 */
 }
-
 
 /* === 卡片樣式 === */
 .cycle-item {
@@ -291,14 +287,11 @@ defineExpose({
 }
 
 /* === 狀態樣式 === */
+
+/* === 淺色主題 === */
 .status-not-started {
     background-color: #c2bbbb !important;
     color: #302f2f !important;
-}
-
-[data-theme="dark"] .status-not-started {
-    background-color: #555 !important;
-    color: #bcbcbc !important;
 }
 
 .status-next {
@@ -306,19 +299,9 @@ defineExpose({
     color: #7e4703 !important;
 }
 
-[data-theme="dark"] .status-next {
-    background-color: #886600 !important;
-    color: #ffd700 !important;
-}
-
 .status-ongoing {
     background-color: #c2ff68 !important;
     color: #226942 !important;
-}
-
-[data-theme="dark"] .status-ongoing {
-    background-color: #005a32 !important;
-    color: #b9e4c9 !important;
 }
 
 .status-ended {
@@ -326,9 +309,25 @@ defineExpose({
     color: #8a0037 !important;
 }
 
+/* === 深色主題 === */
+[data-theme="dark"] .status-not-started {
+    background-color: #404040 !important; /* 中性深灰色，表示非活動 */
+    color: #a0a0a0 !important;          /* 柔和的淺灰色文字，確保可讀性 */
+}
+
+[data-theme="dark"] .status-next {
+    background-color: #7c5b00 !important; /* 深琥珀色，沉穩而醒目 */
+    color: #ffd580 !important;          /* 明亮的杏黃色文字 */
+}
+
+[data-theme="dark"] .status-ongoing {
+    background-color: #005f56 !important; /* 深青色，代表持續與活力 */
+    color: #a3f7eb !important;          /* 明亮的薄荷綠文字 */
+}
+
 [data-theme="dark"] .status-ended {
-    background-color: #993333 !important;
-    color: #ffcccc !important;
+    background-color: #33061d !important; /* 深洋紅色，表示結束或歸檔 */
+    color: #ffb7cd !important;          /* 柔和的粉色文字 */
 }
 
 /* === 圖例區域樣式 === */
@@ -358,5 +357,53 @@ defineExpose({
 [data-theme="dark"] .legend-item {
     color: #f4f4f9;
     background-color: #555;
+}
+
+/* === 滾動條樣式 === */
+/* 淺色主題滾動條 */
+.modal-body::-webkit-scrollbar {
+    width: 18px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+    border: 2px solid #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 深色主題滾動條 */
+[data-theme="dark"] .modal-body::-webkit-scrollbar-track {
+    background: #2c2c2c;
+    border-radius: 6px;
+}
+
+[data-theme="dark"] .modal-body::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 6px;
+    border: 2px solid #2c2c2c;
+}
+
+[data-theme="dark"] .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Firefox 滾動條樣式 */
+
+.modal-body {
+    scrollbar-width: thick;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+[data-theme="dark"] .modal-body {
+    scrollbar-color: #555 #2c2c2c;
 }
 </style>

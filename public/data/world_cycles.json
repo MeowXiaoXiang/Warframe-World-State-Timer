@@ -1,23 +1,9 @@
 {
     "worlds": {
-        "earth": {
-            "name_zh-TW": "地球森林",
-            "name_en-US": "Earth Forest",
-            "startTime": "2015-12-03T00:00:00Z",
-            "loopTime": 28800,
-            "dayTime": 14400,
-            "nightTime": 14400,
-            "dayStatusName_zh-TW": "白晝",
-            "dayStatusName_en-US": "Day",
-            "nightStatusName_zh-TW": "夜晚",
-            "nightStatusName_en-US": "Night",
-            "dayIcon": "☀️",
-            "nightIcon": "🌙"
-        },
-        "plains": {
-            "name_zh-TW": "夜靈平原",
-            "name_en-US": "Plains of Eidolon",
-            "startTime": "2024-12-09T06:15:20Z",
+        "plains_earth": {
+            "name_zh-TW": "夜靈平野 & 地球",
+            "name_en-US": "Plains of Eidolon & Earth",
+            "startTime": "2021-02-05T12:27:54Z",
             "loopTime": 8998.874,
             "dayTime": 5998.874,
             "nightTime": 3000,
@@ -53,13 +39,13 @@
             "dayStatusName_en-US": "Fass",
             "nightStatusName_zh-TW": "Vome",
             "nightStatusName_en-US": "Vome",
-            "dayIcon": "./images/factions/fass.png",
-            "nightIcon": "./images/factions/vome.png"
+            "dayIcon": "./images/factions/vome.png",
+            "nightIcon": "./images/factions/fass.png"
         },
         "zariman":{
             "name_zh-TW": "扎日曼號",
             "name_en-US": "Zariman Ten Zero",
-            "startTime": "2024-12-09T03:45:20Z",
+            "startTime": "2025-02-06T12:34:30Z",
             "loopTime": 18000,
             "dayTime": 9000,
             "nightTime": 9000,
