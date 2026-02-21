@@ -92,6 +92,11 @@ const isSvg = (icon) => {
     /* 滑鼠經過時顯示點擊手勢 */
 }
 
+[data-theme="dark"] .card {
+    --bs-card-bg: #444;
+    --bs-card-border-color: rgba(255, 255, 255, 0.12);
+}
+
 /* 卡片 hover 時的效果 */
 .card:hover {
     transform: scale(1.05);

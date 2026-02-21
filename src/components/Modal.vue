@@ -166,20 +166,42 @@ defineExpose({
 </script>
 
 <style scoped>
+.modal-content {
+    border-radius: 14px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+    background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: #1d222b;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5);
+}
+
+.modal-dialog.modal-lg {
+    max-width: min(700px, calc(100vw - 1.5rem));
+    margin: 0.75rem auto;
+}
+
+:global(.modal-backdrop.show) {
+    opacity: 0.5;
+}
+
 /* === 互動視窗子標題樣式 === */
 .modal-subheader {
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
     background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     font-weight: bold;
 }
 
 [data-theme="dark"] .modal-subheader {
-    background-color: #444;
-    border-bottom-color: #666;
-    color: #f4f4f9;
+    background-color: #323842;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    color: #d9e0eb;
 }
 
 .modal-subtitle {
@@ -189,21 +211,25 @@ defineExpose({
 }
 
 [data-theme="dark"] .modal-subtitle {
-    color: #cccccc;
+    color: #d4dbe7;
 }
 
 /* === 互動視窗滾動內容 === */
 .modal-body {
-    max-height: 70vh;
+    max-height: calc(100dvh - 220px);
     overflow-y: auto;
-    padding: 20px;
+    padding: 18px 16px 12px;
     background-color: #f9f9f9;
     color: #333;
 }
 
+.modal-body > :last-child {
+    margin-bottom: 0;
+}
+
 [data-theme="dark"] .modal-body {
-    background-color: #333;
-    color: #f4f4f9;
+    background-color: #262c35;
+    color: #dfe6f1;
 }
 
 /* === 日期標題樣式 === */
@@ -213,13 +239,17 @@ defineExpose({
     margin: 15px 0;
     text-align: center;
     color: #4a4a4a;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     padding-bottom: 5px;
 }
 
+.modal-body > .schedule-date:first-child {
+    margin-top: 6px;
+}
+
 [data-theme="dark"] .schedule-date {
-    color: #cccccc;
-    border-bottom-color: #666;
+    color: #d6deea;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 /* === 白天與夜晚容器樣式 === */
@@ -227,7 +257,7 @@ defineExpose({
     display: flex;
     justify-content: space-between;
     gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .day-container,
@@ -236,7 +266,7 @@ defineExpose({
     padding: 10px;
     border-radius: 10px;
     background-color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -258,11 +288,13 @@ defineExpose({
 
 /* 白天容器樣式 - 深色模式 */
 [data-theme="dark"] .day-container {
-    background-color: #29271f; /* 非常深的暖灰色，模擬被遮蔽的日光 */
+    background-color: #332f22;
+    border: 1px solid rgba(255, 221, 153, 0.18);
 }
 
 [data-theme="dark"] .night-container {
-    background-color: #1e222b; /* 深邃的午夜藍，營造靜謐的夜晚氛圍 */
+    background-color: #1f2940;
+    border: 1px solid rgba(153, 194, 255, 0.2);
 }
 
 /* === 卡片樣式 === */
@@ -281,9 +313,9 @@ defineExpose({
 }
 
 [data-theme="dark"] .cycle-item {
-    background-color: #444;
-    color: #f4f4f9;
-    border-color: #666;
+    background-color: #3f4651;
+    color: #dfe6f1;
+    border-color: #636d7c;
 }
 
 /* === 狀態樣式 === */
@@ -311,23 +343,23 @@ defineExpose({
 
 /* === 深色主題 === */
 [data-theme="dark"] .status-not-started {
-    background-color: #404040 !important; /* 中性深灰色，表示非活動 */
-    color: #a0a0a0 !important;          /* 柔和的淺灰色文字，確保可讀性 */
+    background-color: #4a505a !important;
+    color: #d0d7e2 !important;
 }
 
 [data-theme="dark"] .status-next {
-    background-color: #7c5b00 !important; /* 深琥珀色，沉穩而醒目 */
-    color: #ffd580 !important;          /* 明亮的杏黃色文字 */
+    background-color: #9c7417 !important;
+    color: #fff0c7 !important;
 }
 
 [data-theme="dark"] .status-ongoing {
-    background-color: #005f56 !important; /* 深青色，代表持續與活力 */
-    color: #a3f7eb !important;          /* 明亮的薄荷綠文字 */
+    background-color: #0f7f77 !important;
+    color: #d7fff9 !important;
 }
 
 [data-theme="dark"] .status-ended {
-    background-color: #33061d !important; /* 深洋紅色，表示結束或歸檔 */
-    color: #ffb7cd !important;          /* 柔和的粉色文字 */
+    background-color: #6d163d !important;
+    color: #ffe0ee !important;
 }
 
 /* === 圖例區域樣式 === */
@@ -336,13 +368,13 @@ defineExpose({
     justify-content: space-around;
     padding: 10px 15px;
     background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-[data-theme="dark"] .modal-legend {
-    background-color: #444;
-    border-bottom-color: #666;
-    color: #f4f4f9;
+[data-theme="dark"] .modal-legend.bg-dark {
+    background-color: #2a303a !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    color: #dfe6f1;
 }
 
 .legend-item {
@@ -355,14 +387,14 @@ defineExpose({
 }
 
 [data-theme="dark"] .legend-item {
-    color: #f4f4f9;
-    background-color: #555;
+    color: #dfe6f1;
+    background-color: #4a505a;
 }
 
 /* === 滾動條樣式 === */
 /* 淺色主題滾動條 */
 .modal-body::-webkit-scrollbar {
-    width: 18px;
+    width: 10px;
 }
 
 .modal-body::-webkit-scrollbar-track {
@@ -382,28 +414,50 @@ defineExpose({
 
 /* 深色主題滾動條 */
 [data-theme="dark"] .modal-body::-webkit-scrollbar-track {
-    background: #2c2c2c;
+    background: #262c34;
     border-radius: 6px;
 }
 
 [data-theme="dark"] .modal-body::-webkit-scrollbar-thumb {
-    background: #555;
+    background: #5f6875;
     border-radius: 6px;
-    border: 2px solid #2c2c2c;
+    border: 2px solid #262c34;
 }
 
 [data-theme="dark"] .modal-body::-webkit-scrollbar-thumb:hover {
-    background: #666;
+    background: #747f8f;
 }
 
 /* Firefox 滾動條樣式 */
 
 .modal-body {
-    scrollbar-width: thick;
+    scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 [data-theme="dark"] .modal-body {
-    scrollbar-color: #555 #2c2c2c;
+    scrollbar-color: #5f6875 #262c34;
+}
+
+[data-theme="dark"] .modal-header.bg-dark {
+    background-color: #1f252e !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    color: #e3eaf5;
+}
+
+@media (max-width: 767px) {
+    .modal-dialog.modal-lg {
+        max-width: calc(100vw - 2rem);
+        margin: 1rem auto;
+    }
+
+    .modal-content {
+        max-height: calc(100dvh - 2rem);
+    }
+
+    .modal-body {
+        max-height: calc(100dvh - 230px);
+        padding: 16px 14px 10px;
+    }
 }
 </style>

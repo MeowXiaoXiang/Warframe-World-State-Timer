@@ -44,6 +44,12 @@ coverage/
 
 # Dependency directories
 node_modules/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # Dist directory (generated during build)
 dist/

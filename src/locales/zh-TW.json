@@ -1,7 +1,6 @@
 {
     "app": {
-        "currentTime": "現在時間",
-        "timezone": "時區"
+        "siteName": "Warframe 世界循環時間表"
     },
     "time": {
         "hours": "小時",

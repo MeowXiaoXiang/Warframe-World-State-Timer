@@ -2,7 +2,7 @@
     <footer class="footer text-center py-2" :class="{ 'bg-dark text-light': isDarkTheme, 'bg-light text-dark': !isDarkTheme }">
         <div class="container">
             <p class="mb-1">
-                © 2025
+                © 2026
                 <!-- 個人 Github 頁面連結 -->
                 <a
                     href="https://github.com/MeowXiaoXiang"

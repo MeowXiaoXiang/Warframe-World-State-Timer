@@ -1,7 +1,6 @@
 {
     "app": {
-        "currentTime": "Current Time",
-        "timezone": "TimeZone"
+        "siteName": "Warframe World Cycle Schedule"
     },
     "time": {
         "hours": "h",

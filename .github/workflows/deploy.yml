@@ -1,34 +1,38 @@
 name: Deploy to GitHub Pages
 
 on:
-    push:
-        branches:
-            - main # 修改為你的主分支名稱
+  push:
+    branches:
+      - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
 
-            - name: Install yarn
-              run: npm install -g yarn # 將 Yarn 裝起來
+      - name: Enable Corepack
+        run: corepack enable
 
-            - name: Install dependencies
-              run: yarn install # 利用 Yarn 將依賴項等等進行安裝
+      - name: Activate project Yarn version
+        run: corepack prepare yarn@4.12.0 --activate
 
-            - name: Build project
-              run: yarn build # 使用 Yarn 進行 Build
+      - name: Install dependencies
+        run: yarn install --immutable
 
-            - name: Deploy to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v3
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./dist
+      - name: Build project
+        run: yarn build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist

@@ -4,19 +4,13 @@
 		<LoadingComponent v-show="loadingVisible" @loading-complete="onLoadingComplete" />
 		<!-- 主內容 -->
 		<div id="main-content" :class="{ visible: !loadingVisible }">
-			<div id="card-container" class="container mt-5">
+			<HeaderBar :site-name="t('app.siteName')" :current-time="currentTime" :current-timezone="currentTimezone" />
+			<div id="card-container" class="container">
 				<CardComponent v-for="world in worlds" :key="world.id" :world="world"
 					:status="worldStatus[world.id]?.status" :next-cycle="worldStatus[world.id]?.nextCycle"
 					:time-left="worldStatus[world.id]?.timeLeft" :icon="worldStatus[world.id]?.icon"
 					@click="handleCardClick(world)" />
 			</div>
-			<!-- 時間與時區 -->
-			<p class="text-center mt-3" :class="{ 'text-light': isDarkTheme, 'text-dark': !isDarkTheme }">
-				{{ t('app.currentTime') }}: {{ currentTime }}
-			</p>
-			<p class="text-center" :class="{ 'text-light': isDarkTheme, 'text-dark': !isDarkTheme }">
-				{{ t('app.timezone') }}: {{ currentTimezone }}
-			</p>
 			<!-- 互動視窗 -->
 			<ModalComponent ref="modalComponent" :world="selectedWorld" @modal-closed="clearSelectedWorld" />
 			<!-- 懸浮按鈕 -->
@@ -28,17 +22,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import CardComponent from "./components/Card.vue";
 import FooterComponent from "./components/Footer.vue";
 import LoadingComponent from "./components/Loading.vue";
 import ModalComponent from "./components/Modal.vue";
 import FloatingButtons from "./components/FloatingButtons.vue";
+import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import { calculateWorldStatus } from "./utils/worldCycleCalculator";
-import { isDarkTheme } from "./utils/themeManager";
 
 dayjs.extend(timezone);
 
@@ -52,6 +46,15 @@ const worldStatus = ref({}); // 動態狀態資料
 const currentTime = ref("");
 const currentTimezone = ref("");
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const timeZoneOffsetFormatter = new Intl.DateTimeFormat("en-US", {
+	timeZone: userTimeZone,
+	timeZoneName: "shortOffset",
+});
+const timeZoneShortFormatter = new Intl.DateTimeFormat("en-US", {
+	timeZone: userTimeZone,
+	timeZoneName: "short",
+});
+let updateTimerId = null;
 
 // 管理互動視窗狀態
 const modalComponent = ref(null);
@@ -86,10 +89,15 @@ const fetchWorldsData = async () => {
 // 更新當前時間和時區
 const updateTimeAndTimezone = () => {
 	currentTime.value = dayjs().tz(userTimeZone).format("YYYY/MM/DD HH:mm:ss");
-	currentTimezone.value = `${userTimeZone} (${new Date()
-		.toLocaleString("en-US", { timeZoneName: "short" })
-		.split(" ")
-		.pop()})`;
+	const timeZoneOffset =
+		timeZoneOffsetFormatter
+			.formatToParts(new Date())
+			.find((part) => part.type === "timeZoneName")?.value ||
+		timeZoneShortFormatter
+			.formatToParts(new Date())
+			.find((part) => part.type === "timeZoneName")?.value ||
+		"UTC";
+	currentTimezone.value = `${userTimeZone} (${timeZoneOffset})`;
 };
 
 // 處理卡片點擊事件
@@ -139,6 +147,12 @@ watch(
 watch(locale, () => {
 	console.debug(`Language switched to: ${locale.value}`);
 	worlds.value = transformWorldData(locale.value); // 僅更新語言變化
+	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t }); // 立即同步狀態，避免切換語言瞬間不一致
+
+	// 若互動視窗有綁定世界，切語言後同步到新語言物件
+	if (selectedWorld.value) {
+		selectedWorld.value = worlds.value.find((world) => world.id === selectedWorld.value.id) || null;
+	}
 });
 
 // 初始化
@@ -146,21 +160,34 @@ onMounted(async () => {
 	await fetchWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
 	updateTimeAndTimezone();
-	setInterval(() => {
+	updateTimerId = setInterval(() => {
 		worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
 		updateTimeAndTimezone();
 	}, 1000);
+});
+
+onUnmounted(() => {
+	if (updateTimerId) {
+		clearInterval(updateTimerId);
+		updateTimerId = null;
+	}
 });
 </script>
 
 <style scoped>
 #main-content {
 	opacity: 0;
-	padding-bottom: 60px;
+	padding-top: 72px;
+	padding-bottom: max(72px, calc(60px + env(safe-area-inset-bottom)));
 	transition: opacity 1s ease-in-out;
 }
 
 #main-content.visible {
 	opacity: 1;
+}
+
+#card-container {
+	margin-top: 0.75rem;
+	padding-bottom: 0.5rem;
 }
 </style>
