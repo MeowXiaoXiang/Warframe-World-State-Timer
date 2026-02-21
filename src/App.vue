@@ -100,6 +100,11 @@ const updateTimeAndTimezone = () => {
 	currentTimezone.value = `${userTimeZone} (${timeZoneOffset})`;
 };
 
+// 同步更新瀏覽器分頁標題
+const updateDocumentTitle = () => {
+	document.title = t("app.siteName");
+};
+
 // 處理卡片點擊事件
 const handleCardClick = (world) => {
 	if (!modalComponent.value) {
@@ -148,6 +153,7 @@ watch(locale, () => {
 	console.debug(`Language switched to: ${locale.value}`);
 	worlds.value = transformWorldData(locale.value); // 僅更新語言變化
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t }); // 立即同步狀態，避免切換語言瞬間不一致
+	updateDocumentTitle();
 
 	// 若互動視窗有綁定世界，切語言後同步到新語言物件
 	if (selectedWorld.value) {
@@ -157,6 +163,7 @@ watch(locale, () => {
 
 // 初始化
 onMounted(async () => {
+	updateDocumentTitle();
 	await fetchWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
 	updateTimeAndTimezone();

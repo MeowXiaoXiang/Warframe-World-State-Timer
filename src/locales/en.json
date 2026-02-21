@@ -21,5 +21,10 @@
             "ongoing": "Ongoing",
             "ended": "Ended"
         }
+    },
+    "floatingButtons": {
+        "switchLanguage": "Switch Language",
+        "switchToLightTheme": "Switch to Light Theme",
+        "switchToDarkTheme": "Switch to Dark Theme"
     }
 }

@@ -24,6 +24,7 @@
 - **Vue.js 3**：用於開發互動式前端，實現了語言切換與主題切換功能。
 - **Vue I18n**：實現多語言支持，提供簡便的語言切換功能。
 - **Vite**：作為構建工具，提供快速的開發與構建體驗。
+- **vite-plugin-pwa**：提供 PWA（可安裝與離線快取）能力。
 - **Yarn 4 (Berry) + PnP**：使用現代化依賴管理，減少 `node_modules` 帶來的安裝與解析負擔。
 
 ## 資料來源
@@ -133,6 +134,12 @@ yarn build
 ```
 
 命令會 Build 並生成生產版本的網站，將輸出到 `./dist` 目錄。
+
+## PWA 支援
+
+- 已整合 Web App Manifest 與 Service Worker。
+- 部署後可在支援的瀏覽器中「安裝」到桌面或主畫面。
+- `world_cycles.json` 會透過 `StaleWhileRevalidate` 策略快取，提升重開速度與離線可用性。
 
 ## 版本更新
 

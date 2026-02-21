@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { registerSW } from "virtual:pwa-register";
 import App from "./App.vue";
 import "bootstrap/dist/css/bootstrap.min.css"; // Bootstrap CSS
 import "./style.css"; // 全域樣式
@@ -24,6 +25,9 @@ dayjs.extend(isBetween);
 
 // 初始化主題
 initTheme();
+
+// 註冊 PWA Service Worker
+registerSW({ immediate: true });
 
 // Vue I18n
 const savedLocale = localStorage.getItem("locale") || "zh-TW";

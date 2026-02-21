@@ -21,5 +21,10 @@
             "ongoing": "進行中",
             "ended": "已結束"
         }
+    },
+    "floatingButtons": {
+        "switchLanguage": "切換語言",
+        "switchToLightTheme": "切換至淺色主題",
+        "switchToDarkTheme": "切換至深色主題"
     }
 }

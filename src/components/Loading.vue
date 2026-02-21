@@ -36,6 +36,10 @@ onMounted(() => {
 <style scoped>
 /* Loading 全屏覆蓋背景 */
 #loading-overlay {
+    --loading-bg-start: #dfeafe;
+    --loading-bg-mid: #f5f9ff;
+    --loading-bg-end: #cddff8;
+    --loading-glow: rgba(255, 255, 255, 0.65);
     position: fixed;
     top: 0;
     left: 0;
@@ -47,10 +51,26 @@ onMounted(() => {
     z-index: 1050;
     opacity: 1;
     transition: opacity 0.5s ease-in-out; /* 淡出動畫 */
-    background: linear-gradient(90deg, #121212, #333, #121212);
+    background: linear-gradient(90deg, var(--loading-bg-start), var(--loading-bg-mid), var(--loading-bg-end));
     background-size: 200% 200%;
     animation: gradient 2s ease infinite; /* 背景漸變動畫 */
     pointer-events: all; /* 避免在 Loading 狀態下點擊 */
+}
+
+#loading-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, var(--loading-glow) 0%, rgba(255, 255, 255, 0) 65%);
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+[data-theme="dark"] #loading-overlay {
+    --loading-bg-start: #11141a;
+    --loading-bg-mid: #283246;
+    --loading-bg-end: #11141a;
+    --loading-glow: rgba(102, 140, 214, 0.28);
 }
 
 #loading-overlay.transparent {
@@ -60,9 +80,16 @@ onMounted(() => {
 
 /* Loading 圖標樣式 */
 #loading-icon {
+    position: relative;
+    z-index: 1;
     width: 120px;
     height: 120px;
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.2));
     animation: bounce 1s ease-in-out infinite; /* 彈跳動畫 */
+}
+
+[data-theme="dark"] #loading-icon {
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
 }
 
 /* 背景漸變動畫 */
