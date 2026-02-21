@@ -105,6 +105,17 @@ const updateDocumentTitle = () => {
 	document.title = t("app.siteName");
 };
 
+// 依語言切換 PWA manifest
+const updateManifestLink = () => {
+	const manifestElement = document.getElementById("app-manifest");
+	if (!manifestElement) return;
+
+	const manifestName = locale.value === "en-US"
+		? "manifest.en-US.webmanifest"
+		: "manifest.zh-TW.webmanifest";
+	manifestElement.setAttribute("href", `${import.meta.env.BASE_URL}${manifestName}`);
+};
+
 // 處理卡片點擊事件
 const handleCardClick = (world) => {
 	if (!modalComponent.value) {
@@ -154,6 +165,7 @@ watch(locale, () => {
 	worlds.value = transformWorldData(locale.value); // 僅更新語言變化
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t }); // 立即同步狀態，避免切換語言瞬間不一致
 	updateDocumentTitle();
+	updateManifestLink();
 
 	// 若互動視窗有綁定世界，切語言後同步到新語言物件
 	if (selectedWorld.value) {
@@ -164,6 +176,7 @@ watch(locale, () => {
 // 初始化
 onMounted(async () => {
 	updateDocumentTitle();
+	updateManifestLink();
 	await fetchWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
 	updateTimeAndTimezone();
