@@ -1,7 +1,7 @@
 <template>
-    <footer class="footer text-center py-2" :class="{ 'bg-dark text-light': isDarkTheme, 'bg-light text-dark': !isDarkTheme }">
+    <footer ref="footerElement" class="footer text-center py-2" :class="{ 'bg-dark text-light': isDarkTheme, 'bg-light text-dark': !isDarkTheme }">
         <div class="container">
-            <p>
+            <p class="footer-line">
                 © 2026
                 <!-- 個人 Github 頁面連結 -->
                 <a
@@ -40,7 +40,37 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted, ref } from "vue";
 import { isDarkTheme } from "../utils/themeManager";
+
+const footerElement = ref(null);
+let footerResizeObserver = null;
+
+const syncFooterHeight = () => {
+    const footerHeight = footerElement.value?.offsetHeight ?? 0;
+    document.documentElement.style.setProperty("--app-footer-height", `${footerHeight}px`);
+};
+
+onMounted(() => {
+    syncFooterHeight();
+    window.addEventListener("resize", syncFooterHeight);
+
+    if ("ResizeObserver" in window && footerElement.value) {
+        footerResizeObserver = new ResizeObserver(syncFooterHeight);
+        footerResizeObserver.observe(footerElement.value);
+    }
+});
+
+onUnmounted(() => {
+    window.removeEventListener("resize", syncFooterHeight);
+
+    if (footerResizeObserver) {
+        footerResizeObserver.disconnect();
+        footerResizeObserver = null;
+    }
+
+    document.documentElement.style.removeProperty("--app-footer-height");
+});
 </script>
 
 <style scoped>
@@ -52,7 +82,11 @@ footer.footer {
     box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
     font-size: 0.9rem;
     transition: background-color 0.3s, color 0.3s;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.footer-line {
+    margin-bottom: 0.25rem;
 }
 
 /* 名字按鈕樣式 */

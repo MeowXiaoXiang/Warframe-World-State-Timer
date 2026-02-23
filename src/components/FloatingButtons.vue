@@ -74,8 +74,8 @@ onMounted(() => {
 .floating-container {
 	position: fixed;
 	/* 固定在頁面 */
-	bottom: 55px;
-	/* 距離底部 55px */
+	bottom: 18px;
+	/* 預設維持原本位置 */
 	right: 20px;
 	/* 距離右側 20px */
 	z-index: 1050;
@@ -90,10 +90,10 @@ onMounted(() => {
 	/* 容器過渡動畫 */
 }
 
-@media (min-width: 585px) {
+/* 只有螢幕寬度 <= 560px，且 footer 超過 56px 時才往上補 */
+@media (max-width: 560px) {
 	.floating-container {
-		bottom: 18px;
-		/* 大於 585px 時距離底部調整到 20px */
+		bottom: calc(10px + max(0px, calc(var(--app-footer-height, 0px))));
 	}
 }
 
