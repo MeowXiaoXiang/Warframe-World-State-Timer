@@ -1,7 +1,7 @@
 <template>
     <footer class="footer text-center py-2" :class="{ 'bg-dark text-light': isDarkTheme, 'bg-light text-dark': !isDarkTheme }">
         <div class="container">
-            <p class="mb-1">
+            <p>
                 © 2026
                 <!-- 個人 Github 頁面連結 -->
                 <a
@@ -44,7 +44,7 @@ import { isDarkTheme } from "../utils/themeManager";
 </script>
 
 <style scoped>
-.footer {
+footer.footer {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -52,6 +52,7 @@ import { isDarkTheme } from "../utils/themeManager";
     box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
     font-size: 0.9rem;
     transition: background-color 0.3s, color 0.3s;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
 }
 
 /* 名字按鈕樣式 */
@@ -74,7 +75,7 @@ import { isDarkTheme } from "../utils/themeManager";
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 浅色模式 */
+/* 淺色模式 */
 .name-btn-light {
     background-color: inherit;
     color: black;
