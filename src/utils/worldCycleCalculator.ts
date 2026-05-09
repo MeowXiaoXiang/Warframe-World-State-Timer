@@ -1,7 +1,17 @@
 import dayjs from "dayjs";
+import type { ComposerTranslation } from "vue-i18n";
+import type { WorldCycle, WorldStatusMap } from "../types/world";
 
-export function calculateWorldStatus(worlds, userTimeZone, i18n) {
-    const worldStatus = {};
+interface TranslationContext {
+    t: ComposerTranslation;
+}
+
+export function calculateWorldStatus(
+    worlds: WorldCycle[],
+    userTimeZone: string,
+    i18n: TranslationContext
+): WorldStatusMap {
+    const worldStatus: WorldStatusMap = {};
 
     worlds.forEach((world) => {
         const now = dayjs().tz(userTimeZone);
@@ -9,7 +19,10 @@ export function calculateWorldStatus(worlds, userTimeZone, i18n) {
         const timeElapsed = now.diff(startTime, "second");
         const timeInCycle = timeElapsed % world.loopTime;
 
-        let status, nextCycle, icon, timeLeft;
+        let status: string;
+        let nextCycle: string;
+        let icon: string;
+        let timeLeft: string;
 
         if (timeInCycle < world.dayTime) {
             status = world.dayStatusName;
@@ -35,7 +48,7 @@ export function calculateWorldStatus(worlds, userTimeZone, i18n) {
     return worldStatus;
 }
 
-function formatTimeLeft(seconds, i18n) {
+function formatTimeLeft(seconds: number, i18n: TranslationContext): string {
     const t = i18n.t; // 使用 i18n 的翻譯方法
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);

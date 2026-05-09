@@ -21,7 +21,7 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import CardComponent from "./components/Card.vue";
@@ -33,6 +33,7 @@ import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import { calculateWorldStatus } from "./utils/worldCycleCalculator";
+import type { ModalExpose, RawWorldCycle, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./types/world";
 
 dayjs.extend(timezone);
 
@@ -40,9 +41,9 @@ const { locale, t } = useI18n(); // 使用 vue-i18n
 
 // 全局狀態
 const loadingVisible = ref(true);
-const worlds = ref([]); // 保存處理後的世界資料
-const rawWorldData = ref(null); // 保存原始的 world_cycles.json 資料
-const worldStatus = ref({}); // 動態狀態資料
+const worlds = ref<WorldCycle[]>([]); // 保存處理後的世界資料
+const rawWorldData = ref<RawWorldCyclesData | null>(null); // 保存原始的 world_cycles.json 資料
+const worldStatus = ref<WorldStatusMap>({}); // 動態狀態資料
 const currentTime = ref("");
 const currentTimezone = ref("");
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -54,22 +55,31 @@ const timeZoneShortFormatter = new Intl.DateTimeFormat("en-US", {
 	timeZone: userTimeZone,
 	timeZoneName: "short",
 });
-let updateTimerId = null;
+let updateTimerId: ReturnType<typeof setInterval> | null = null;
 
 // 管理互動視窗狀態
-const modalComponent = ref(null);
-const selectedWorld = ref(null);
+const modalComponent = ref<ModalExpose | null>(null);
+const selectedWorld = ref<WorldCycle | null>(null);
 
 // 從原始資料根據語言提取資料
-const transformWorldData = (locale) => {
-	console.debug(`Transforming world data to ${locale}`);
+const getLocalizedValue = (
+	world: RawWorldCycle,
+	key: "name" | "dayStatusName" | "nightStatusName",
+	currentLocale: string
+): string => {
+	const localizedKey = `${key}_${currentLocale}` as keyof RawWorldCycle;
+	return String(world[localizedKey] || world[key] || "");
+};
+
+const transformWorldData = (currentLocale: string): WorldCycle[] => {
+	console.debug(`Transforming world data to ${currentLocale}`);
 	if (!rawWorldData.value) return [];
 
 	return Object.entries(rawWorldData.value.worlds).map(([id, world]) => ({
 		id,
-		name: world[`name_${locale}`] || world.name, // 動態根據語言選取名稱
-		dayStatusName: world[`dayStatusName_${locale}`] || world.dayStatusName,
-		nightStatusName: world[`nightStatusName_${locale}`] || world.nightStatusName,
+		name: getLocalizedValue(world, "name", currentLocale), // 動態根據語言選取名稱
+		dayStatusName: getLocalizedValue(world, "dayStatusName", currentLocale),
+		nightStatusName: getLocalizedValue(world, "nightStatusName", currentLocale),
 		dayIcon: world.dayIcon,
 		nightIcon: world.nightIcon,
 		startTime: dayjs(world.startTime).tz(userTimeZone),
@@ -83,7 +93,7 @@ const transformWorldData = (locale) => {
 const fetchWorldsData = async () => {
 	const response = await fetch("./data/world_cycles.json");
 	rawWorldData.value = await response.json(); // 存原始資料
-	worlds.value = transformWorldData(locale.value); // 初始化為當前語言
+	worlds.value = transformWorldData(String(locale.value)); // 初始化為當前語言
 };
 
 // 更新當前時間和時區
@@ -117,7 +127,7 @@ const updateManifestLink = () => {
 };
 
 // 處理卡片點擊事件
-const handleCardClick = (world) => {
+const handleCardClick = (world: WorldCycle) => {
 	if (!modalComponent.value) {
 		console.error("ModalComponent not found");
 		return;
@@ -139,7 +149,10 @@ const clearSelectedWorld = () => {
 
 // 監控 selectedWorld 的狀態變化
 watch(
-	() => worldStatus.value[selectedWorld.value?.id]?.status, // 偵測 selectedWorld 的 status
+	() => {
+		const selectedWorldId = selectedWorld.value?.id;
+		return selectedWorldId ? worldStatus.value[selectedWorldId]?.status : undefined;
+	}, // 偵測 selectedWorld 的 status
 	(newStatus, oldStatus) => {
 		if (!modalComponent.value || !selectedWorld.value) return;
 
@@ -162,14 +175,15 @@ watch(
 // 監控語言變化，切換語言（修改為僅更新處理後的資料）
 watch(locale, () => {
 	console.debug(`Language switched to: ${locale.value}`);
-	worlds.value = transformWorldData(locale.value); // 僅更新語言變化
+	worlds.value = transformWorldData(String(locale.value)); // 僅更新語言變化
 	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t }); // 立即同步狀態，避免切換語言瞬間不一致
 	updateDocumentTitle();
 	updateManifestLink();
 
 	// 若互動視窗有綁定世界，切語言後同步到新語言物件
 	if (selectedWorld.value) {
-		selectedWorld.value = worlds.value.find((world) => world.id === selectedWorld.value.id) || null;
+		const selectedWorldId = selectedWorld.value.id;
+		selectedWorld.value = worlds.value.find((world) => world.id === selectedWorldId) || null;
 	}
 });
 

@@ -43,7 +43,7 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from "vue";
 import { toggleTheme, isDarkTheme } from "../utils/themeManager"; // 引入全域主題管理
 import { useI18n } from "vue-i18n";
@@ -52,7 +52,7 @@ import { Dropdown } from "bootstrap";
 const { locale, t } = useI18n();
 
 // 切換語言
-const switchLanguage = (lang) => {
+const switchLanguage = (lang: "zh-TW" | "en-US") => {
 	locale.value = lang;
 	localStorage.setItem("locale", lang); // 儲存到 localStorage
 	console.debug(`切換語言至：${lang}`);
@@ -60,10 +60,10 @@ const switchLanguage = (lang) => {
 
 // 初始化下拉選單
 onMounted(() => {
-	const dropdownElementList = [].slice.call(
-		document.querySelectorAll(".dropdown-toggle")
+	const dropdownElementList = Array.from(
+		document.querySelectorAll<HTMLElement>(".dropdown-toggle")
 	);
-	dropdownElementList.map(
+	dropdownElementList.forEach(
 		(dropdownToggleEl) => new Dropdown(dropdownToggleEl)
 	);
 });

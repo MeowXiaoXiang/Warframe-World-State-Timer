@@ -41,35 +41,31 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { isDarkTheme } from "../utils/themeManager"; // 引入 isDarkTheme
+import type { WorldCycle } from "../types/world";
 
 const { t } = useI18n();
 
-defineProps({
-    world: { type: Object, required: true },
-    status: { type: String, default: null },
-    nextCycle: { type: String, default: null },
-    timeLeft: { type: String, default: null },
-    icon: { type: String, default: "❓" },
+withDefaults(defineProps<{
+    world: WorldCycle;
+    status?: string | null;
+    nextCycle?: string | null;
+    timeLeft?: string | null;
+    icon?: string;
+}>(), {
+    status: null,
+    nextCycle: null,
+    timeLeft: null,
+    icon: "❓",
 });
 
-/**
- * 判斷是否是圖片路徑（根據後綴名）
- * @param {string} icon
- * @returns {boolean} 是否為圖片
- */
-const isImage = (icon) => {
+const isImage = (icon: string): boolean => {
     return /\.(svg|png|jpg|jpeg|gif)$/i.test(icon);
 };
 
-/**
- * 判斷是否是 SVG 圖片
- * @param {string} icon
- * @returns {boolean} 是否為 SVG
- */
-const isSvg = (icon) => {
+const isSvg = (icon: string): boolean => {
     return /\.svg$/i.test(icon);
 };
 </script>

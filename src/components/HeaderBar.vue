@@ -23,20 +23,20 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { isDarkTheme } from "../utils/themeManager";
 
 const { t } = useI18n();
 
-defineProps({
-	siteName: { type: String, required: true },
-	currentTime: { type: String, required: true },
-	currentTimezone: { type: String, required: true },
-});
+defineProps<{
+	siteName: string;
+	currentTime: string;
+	currentTimezone: string;
+}>();
 
-const deferredInstallPrompt = ref(null);
+const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null);
 const canInstall = ref(false);
 const displayModeMediaQuery = window.matchMedia("(display-mode: standalone)");
 
@@ -49,13 +49,13 @@ const syncInstallAvailability = () => {
 	}
 };
 
-const handleBeforeInstallPrompt = (event) => {
+const handleBeforeInstallPrompt = (event: Event) => {
 	event.preventDefault();
 	if (isStandaloneMode()) {
 		return;
 	}
 
-	deferredInstallPrompt.value = event;
+	deferredInstallPrompt.value = event as BeforeInstallPromptEvent;
 	canInstall.value = true;
 };
 

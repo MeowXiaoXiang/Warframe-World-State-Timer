@@ -16,22 +16,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
+          cache: pnpm
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Activate project Yarn version
-        run: corepack prepare yarn@4.12.0 --activate
+      - name: Activate project pnpm version
+        run: corepack prepare pnpm@11.0.9 --activate
 
-      - name: Verify Yarn version
-        run: yarn --version
+      - name: Verify pnpm version
+        run: pnpm --version
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: yarn build
+        run: pnpm build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

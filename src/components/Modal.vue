@@ -46,31 +46,34 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { Modal } from "bootstrap";
+import { Modal as BootstrapModal } from "bootstrap";
 import { useI18n } from "vue-i18n";
 import { calculateCycles, filterCycles, assignCycleStatuses } from "../utils/scheduleCalculator";
 import { isDarkTheme } from "../utils/themeManager";
+import type { GroupedCycles, WorldCycle } from "../types/world";
 
 const { t } = useI18n();
 
 // Props
-defineProps({
-    world: { type: Object, required: false },
-});
+defineProps<{
+    world?: WorldCycle | null;
+}>();
 
 // Ref & Variables
-const modal = ref(null);
+const modal = ref<HTMLElement | null>(null);
 const isVisible = ref(false); // 是否顯示互動視窗
-let bootstrapModal = null;
-const localWorld = ref(null);
-const localGroupedCycles = ref({});
-const emit = defineEmits(['modal-closed']);
+let bootstrapModal: BootstrapModal | null = null;
+const localWorld = ref<WorldCycle | null>(null);
+const localGroupedCycles = ref<GroupedCycles>({});
+const emit = defineEmits<{
+    "modal-closed": [];
+}>();
 
 onMounted(() => {
     if (modal.value) {
-        bootstrapModal = new Modal(modal.value, {
+        bootstrapModal = new BootstrapModal(modal.value, {
             backdrop: true,
             keyboard: true,
         });
@@ -92,13 +95,13 @@ const clearLocalData = () => {
 };
 
 // 更新分組數據
-const updateGroupedCycles = (world) => {
+const updateGroupedCycles = (world: WorldCycle) => {
     if (!world) return;
     const rawCycles = calculateCycles(world);
     const filteredCycles = filterCycles(rawCycles);
     const assignedCycles = assignCycleStatuses(filteredCycles);
 
-    const grouped = {};
+    const grouped: GroupedCycles = {};
     assignedCycles.forEach((cycle) => {
         const date = cycle.start.format("YYYY/MM/DD");
         if (!grouped[date]) grouped[date] = { day: [], night: [] };
@@ -112,7 +115,7 @@ const updateGroupedCycles = (world) => {
 };
 
 // 開啟互動視窗
-const openModal = (data) => {
+const openModal = (data: { world?: WorldCycle } | null) => {
     if (!bootstrapModal) {
         console.warn("Bootstrap modal is not initialized.");
         return;
@@ -133,13 +136,13 @@ const openModal = (data) => {
 };
 
 // 更新互動視窗數據
-const setWorldAndCycles = (world) => {
+const setWorldAndCycles = (world: WorldCycle) => {
     localWorld.value = world;
     updateGroupedCycles(world);
 };
 
 // 更新當前已開啟的互動視窗資料
-const updateData = (world) => {
+const updateData = (world: WorldCycle) => {
     if (!bootstrapModal) {
         console.warn("updateData called when modal is not initialized.");
         return;

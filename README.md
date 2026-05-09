@@ -25,7 +25,7 @@
 - **Vue I18n**：實現多語言支持，提供簡便的語言切換功能。
 - **Vite**：作為構建工具，提供快速的開發與構建體驗。
 - **vite-plugin-pwa**：提供 PWA（可安裝與離線快取）能力。
-- **Yarn 4 (Berry) + PnP**：使用現代化依賴管理，減少 `node_modules` 帶來的安裝與解析負擔。
+- **pnpm 11**：使用快速且節省磁碟空間的依賴管理工具。
 
 ## 資料來源
 
@@ -106,8 +106,8 @@ print(formatted_time)  # 輸出格式如 '2024-12-01T00:00:00Z'
 
 ### 環境需求
 
-- Node.js 20+
-- Corepack（用於啟用 `packageManager` 指定的 Yarn 版本）
+- Node.js 22.13+
+- Corepack（用於啟用 `packageManager` 指定的 pnpm 版本）
 
 ```bash
 corepack enable
@@ -116,13 +116,13 @@ corepack enable
 ### 安裝依賴
 
 ```bash
-yarn install
+pnpm install
 ```
 
 ### 開發模式
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 這會啟動開發伺服器，並讓你在瀏覽器中預覽網站。
@@ -130,7 +130,7 @@ yarn dev
 ### 構建網站
 
 ```bash
-yarn build
+pnpm build
 ```
 
 命令會 Build 並生成生產版本的網站，將輸出到 `./dist` 目錄。

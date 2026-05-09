@@ -3,14 +3,16 @@
         <img id="loading-icon" src="/images/cycle_icon.png" alt="Loading" />
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 
 // 是否顯示 Loading 畫面
 const visible = ref(true);
 
 // 回報給 App.vue ， 讓其知道 Loading 畫面已結束
-const emit = defineEmits(["loading-complete"]);
+const emit = defineEmits<{
+    "loading-complete": [];
+}>();
 
 // 模擬載入完成
 onMounted(() => {

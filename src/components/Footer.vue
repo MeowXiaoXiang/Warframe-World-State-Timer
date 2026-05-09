@@ -39,12 +39,12 @@
     </footer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
 import { isDarkTheme } from "../utils/themeManager";
 
-const footerElement = ref(null);
-let footerResizeObserver = null;
+const footerElement = ref<HTMLElement | null>(null);
+let footerResizeObserver: ResizeObserver | null = null;
 
 const syncFooterHeight = () => {
     const footerHeight = footerElement.value?.offsetHeight ?? 0;

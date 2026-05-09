@@ -25,6 +25,6 @@ export default defineConfig({
 			},
 		}),
 	],
-	base: process.env.NODE_ENV === 'production' ? "/Warframe-World-State-Timer/" : "/",
+	base: process.env.NODE_ENV === "production" ? "/Warframe-World-State-Timer/" : "/",
 	// 防止在測試狀態下路徑跑掉
 });

@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
+import type { CycleEntry, WorldCycle } from "../types/world";
 
 // 計算所需的循環數據(精確計算 4 天範圍)
-export function calculateCycles(world) {
+export function calculateCycles(world: WorldCycle): CycleEntry[] {
     console.time("calculateCycles");
 
     const now = dayjs();
@@ -13,7 +15,7 @@ export function calculateCycles(world) {
     const rangeStart = now.startOf("day").subtract(1, "day").add(12, "hour");
     const rangeEnd = now.startOf("day").add(2, "day").add(12, "hour");
 
-    const cycles = [];
+    const cycles: CycleEntry[] = [];
     let cycleStartTime = calculateNearestCycleStart(startTime, rangeStart, loopTime);
 
     while (cycleStartTime.isBefore(rangeEnd)) {
@@ -37,14 +39,14 @@ export function calculateCycles(world) {
 }
 
 // 計算最接近的循環起始時間
-function calculateNearestCycleStart(startTime, targetTime, loopTime) {
+function calculateNearestCycleStart(startTime: Dayjs, targetTime: Dayjs, loopTime: number): Dayjs {
     const elapsedTime = targetTime.diff(startTime, "second");
     const remainder = elapsedTime % loopTime;
     return targetTime.subtract(remainder, "second");
 }
 
 // 篩選循環數據，只保留今天和隔天的數據
-export function filterCycles(cycles) {
+export function filterCycles(cycles: CycleEntry[]): CycleEntry[] {
     const now = dayjs();
     const todayStart = now.startOf("day");
     const tomorrowEnd = todayStart.add(1, "day").endOf("day");
@@ -58,9 +60,9 @@ export function filterCycles(cycles) {
 }
 
 // 為循環數據分配狀態
-export function assignCycleStatuses(cycles) {
+export function assignCycleStatuses(cycles: CycleEntry[]): CycleEntry[] {
     const now = dayjs();
-    cycles.forEach((cycle, index) => {
+    cycles.forEach((cycle) => {
         if (now.isBetween(cycle.start, cycle.end)) {
             cycle.statusClass = "status-ongoing";
         } else if (now.isAfter(cycle.end)) {
