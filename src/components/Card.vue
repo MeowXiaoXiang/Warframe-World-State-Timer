@@ -13,9 +13,8 @@
                     </span>
                     <span :class="[
                         'badge',
-                        status === world.dayStatusName ? 'bg-warning' : 'bg-info',
-                        isDarkTheme ? 'text-light' : 'text-dark'
-                    ]">
+                        'state-badge'
+                    ]" :style="stateBadgeStyle">
                         {{ status }}
                     </span>
                     <span :class="isDarkTheme ? 'text-light' : 'text-dark'">
@@ -43,26 +42,40 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { computed } from "vue";
 import { isDarkTheme } from "../utils/themeManager"; // 引入 isDarkTheme
-import type { WorldCycle } from "../types/world";
+import type { WorldCycle, WorldStatePalette, WorldStateTheme } from "../domain/worldCycles";
 
 const { t } = useI18n();
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
     world: WorldCycle;
     status?: string | null;
     nextCycle?: string | null;
     timeLeft?: string | null;
     icon?: string;
+    theme?: WorldStateTheme | null;
 }>(), {
     status: null,
     nextCycle: null,
     timeLeft: null,
     icon: "❓",
+    theme: null,
+});
+
+const stateBadgeStyle = computed(() => {
+    if (!props.theme) return {};
+    const palette: WorldStatePalette = props.theme[isDarkTheme.value ? "dark" : "light"];
+
+    return {
+        "--state-accent": palette.accent,
+        "--state-surface": palette.surface,
+        "--state-text": palette.text,
+    };
 });
 
 const isImage = (icon: string): boolean => {
-    return /\.(svg|png|jpg|jpeg|gif)$/i.test(icon);
+    return /\.(svg|png|jpe?g|gif|webp|avif)$/i.test(icon);
 };
 
 const isSvg = (icon: string): boolean => {
@@ -160,6 +173,12 @@ const isSvg = (icon: string): boolean => {
 }
 
 /* === 自定義 Bootstrap badge 顏色覆蓋 === */
+.state-badge {
+    background-color: var(--state-surface, var(--bs-info)) !important;
+    color: var(--state-text, #111) !important;
+    border: 1px solid color-mix(in srgb, var(--state-accent) 45%, transparent);
+}
+
 [data-theme="dark"] .badge.bg-warning {
     background-color: #886600 !important;
 }

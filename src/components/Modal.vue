@@ -16,25 +16,49 @@
                     <span class="legend-item status-ongoing">{{ t("modal.legend.ongoing") }}</span>
                     <span class="legend-item status-ended">{{ t("modal.legend.ended") }}</span>
                 </div>
-                <!-- 子標題 -->
-                <div class="modal-subheader">
-                    <div class="modal-subtitle day-title">{{ localWorld?.dayStatusName }}</div>
-                    <div class="modal-subtitle night-title">{{ localWorld?.nightStatusName }}</div>
+                <!-- 狀態序列 -->
+                <div class="modal-state-strip">
+                    <span
+                        v-for="state in localWorld?.states"
+                        :key="state.key"
+                        class="state-chip"
+                        :style="getStateStyle(state.theme)"
+                    >
+                        <img
+                            v-if="state.icon && isImage(state.icon)"
+                            :src="state.icon"
+                            :alt="state.label"
+                            class="state-chip-image"
+                            :class="{ 'svg-icon': isSvg(state.icon) }"
+                        />
+                        <span v-else-if="state.icon" class="state-chip-icon">{{ state.icon }}</span>
+                        {{ state.label }}
+                    </span>
                 </div>
                 <!-- 滾動內容 -->
                 <div class="modal-body" :class="isDarkTheme ? 'text-light' : 'text-dark'">
-                    <template v-for="(group, date) in localGroupedCycles" :key="date">
+                    <template v-for="(cycles, date) in localGroupedCycles" :key="date">
                         <div class="schedule-date">{{ date }}</div>
-                        <div class="day-night-row">
-                            <div class="day-container">
-                                <div v-for="cycle in group.day" :key="cycle.start.format('HH:mm')" class="cycle-item"
-                                    :class="cycle.statusClass">
-                                    {{ cycle.start.format("HH:mm") }} ~ {{ cycle.end.format("HH:mm") }}
+                        <div class="timeline-list">
+                            <div
+                                v-for="cycle in cycles"
+                                :key="`${cycle.stateKey}-${cycle.startMs}`"
+                                class="cycle-item"
+                                :class="cycle.statusClass"
+                                :style="getStateStyle(cycle.theme)"
+                            >
+                                <div class="cycle-state">
+                                    <img
+                                        v-if="cycle.icon && isImage(cycle.icon)"
+                                        :src="cycle.icon"
+                                        :alt="cycle.label"
+                                        class="cycle-image"
+                                        :class="{ 'svg-icon': isSvg(cycle.icon) }"
+                                    />
+                                    <span v-else-if="cycle.icon" class="cycle-icon">{{ cycle.icon }}</span>
+                                    <span>{{ cycle.label }}</span>
                                 </div>
-                            </div>
-                            <div class="night-container">
-                                <div v-for="cycle in group.night" :key="cycle.start.format('HH:mm')" class="cycle-item"
-                                    :class="cycle.statusClass">
+                                <div class="cycle-time">
                                     {{ cycle.start.format("HH:mm") }} ~ {{ cycle.end.format("HH:mm") }}
                                 </div>
                             </div>
@@ -50,11 +74,39 @@
 import { ref, onMounted } from "vue";
 import { Modal as BootstrapModal } from "bootstrap";
 import { useI18n } from "vue-i18n";
-import { calculateCycles, filterCycles, assignCycleStatuses } from "../utils/scheduleCalculator";
+import {
+    assignCycleStatuses,
+    calculateCycleEntries,
+    filterEntriesForTodayAndTomorrow,
+    getDefaultScheduleRange,
+} from "../domain/worldCycles";
 import { isDarkTheme } from "../utils/themeManager";
-import type { GroupedCycles, WorldCycle } from "../types/world";
+import type {
+    GroupedCycleEntries,
+    WorldCycle,
+    WorldStatePalette,
+    WorldStateTheme,
+} from "../domain/worldCycles";
 
 const { t } = useI18n();
+
+const isImage = (icon: string): boolean => {
+    return /\.(svg|png|jpe?g|gif|webp|avif)$/i.test(icon);
+};
+
+const isSvg = (icon: string): boolean => {
+    return /\.svg$/i.test(icon);
+};
+
+const getStateStyle = (theme: WorldStateTheme): Record<string, string> => {
+    const palette: WorldStatePalette = theme[isDarkTheme.value ? "dark" : "light"];
+
+    return {
+        "--state-accent": palette.accent,
+        "--state-surface": palette.surface,
+        "--state-text": palette.text,
+    };
+};
 
 // Props
 defineProps<{
@@ -66,7 +118,7 @@ const modal = ref<HTMLElement | null>(null);
 const isVisible = ref(false); // 是否顯示互動視窗
 let bootstrapModal: BootstrapModal | null = null;
 const localWorld = ref<WorldCycle | null>(null);
-const localGroupedCycles = ref<GroupedCycles>({});
+const localGroupedCycles = ref<GroupedCycleEntries>({});
 const emit = defineEmits<{
     "modal-closed": [];
 }>();
@@ -97,19 +149,15 @@ const clearLocalData = () => {
 // 更新分組數據
 const updateGroupedCycles = (world: WorldCycle) => {
     if (!world) return;
-    const rawCycles = calculateCycles(world);
-    const filteredCycles = filterCycles(rawCycles);
+    const rawCycles = calculateCycleEntries(world, getDefaultScheduleRange());
+    const filteredCycles = filterEntriesForTodayAndTomorrow(rawCycles);
     const assignedCycles = assignCycleStatuses(filteredCycles);
 
-    const grouped: GroupedCycles = {};
+    const grouped: GroupedCycleEntries = {};
     assignedCycles.forEach((cycle) => {
         const date = cycle.start.format("YYYY/MM/DD");
-        if (!grouped[date]) grouped[date] = { day: [], night: [] };
-        if (cycle.status === world.dayStatusName) {
-            grouped[date].day.push(cycle);
-        } else {
-            grouped[date].night.push(cycle);
-        }
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(cycle);
     });
     localGroupedCycles.value = grouped;
 };
@@ -183,7 +231,7 @@ defineExpose({
 }
 
 .modal-dialog.modal-lg {
-    max-width: min(700px, calc(100vw - 1.5rem));
+    max-width: min(580px, calc(100vw - 1.5rem));
     margin: 0.75rem auto;
 }
 
@@ -191,30 +239,51 @@ defineExpose({
     opacity: 0.5;
 }
 
-/* === 互動視窗子標題樣式 === */
-.modal-subheader {
+/* === 狀態序列樣式 === */
+.modal-state-strip {
     display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
     background-color: #f8f9fa;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     font-weight: bold;
 }
 
-[data-theme="dark"] .modal-subheader {
+[data-theme="dark"] .modal-state-strip {
     background-color: #323842;
     border-bottom-color: rgba(255, 255, 255, 0.1);
     color: #d9e0eb;
 }
 
-.modal-subtitle {
-    font-size: 1.2rem;
-    text-align: center;
-    color: #4a4a4a;
+.state-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background-color: var(--state-surface);
+    color: var(--state-text);
+    border: 1px solid color-mix(in srgb, var(--state-accent) 38%, transparent);
+    font-size: 0.9rem;
 }
 
-[data-theme="dark"] .modal-subtitle {
-    color: #d4dbe7;
+.state-chip-icon {
+    line-height: 1;
+}
+
+.state-chip-image {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+[data-theme="dark"] .state-chip {
+    background-color: var(--state-surface);
+    color: var(--state-text);
+    border-color: color-mix(in srgb, var(--state-accent) 52%, transparent);
 }
 
 /* === 互動視窗滾動內容 === */
@@ -255,70 +324,72 @@ defineExpose({
     border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
-/* === 白天與夜晚容器樣式 === */
-.day-night-row {
+/* === 時間線樣式 === */
+.timeline-list {
     display: flex;
-    justify-content: space-between;
-    gap: 15px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
     margin-bottom: 14px;
 }
 
-.day-container,
-.night-container {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-/* 白天容器樣式 - 淺色模式 */
-.day-container {
-    background-color: #fff4e0;
-    /* 柔和奶油色，更明亮的日間感覺 */
-}
-
-/* 夜晚容器樣式 - 淺色模式 */
-.night-container {
-    background-color: #e2eafc;
-    /* 淡淡的天空藍，帶有一絲夜晚感 */
-}
-
-/* 白天容器樣式 - 深色模式 */
-[data-theme="dark"] .day-container {
-    background-color: #332f22;
-    border: 1px solid rgba(255, 221, 153, 0.18);
-}
-
-[data-theme="dark"] .night-container {
-    background-color: #1f2940;
-    border: 1px solid rgba(153, 194, 255, 0.2);
-}
-
-/* === 卡片樣式 === */
 .cycle-item {
-    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    padding: 8px 12px;
     border-radius: 8px;
     background-color: white;
     border: 1px solid #ddd;
-    font-size: 1.1rem;
+    border-left: 6px solid var(--state-accent);
+    font-size: 1.04rem;
     color: #333;
     width: 100%;
-    max-width: 200px;
-    text-align: center;
-    margin-bottom: 5px;
+    text-align: left;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cycle-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cycle-icon {
+    line-height: 1;
+}
+
+.cycle-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.svg-icon {
+    filter: invert(0);
+    transition: filter 0.3s ease;
+}
+
+[data-theme="dark"] .svg-icon {
+    filter: invert(1);
+}
+
+.cycle-time {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 1.2;
 }
 
 [data-theme="dark"] .cycle-item {
     background-color: #3f4651;
     color: #dfe6f1;
     border-color: #636d7c;
+    border-left-color: var(--state-accent);
 }
 
 /* === 狀態樣式 === */
@@ -461,6 +532,12 @@ defineExpose({
     .modal-body {
         max-height: calc(100dvh - 230px);
         padding: 16px 14px 10px;
+    }
+
+    .cycle-item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
     }
 }
 </style>

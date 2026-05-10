@@ -9,6 +9,7 @@
 				<CardComponent v-for="world in worlds" :key="world.id" :world="world"
 					:status="worldStatus[world.id]?.status" :next-cycle="worldStatus[world.id]?.nextCycle"
 					:time-left="worldStatus[world.id]?.timeLeft" :icon="worldStatus[world.id]?.icon"
+					:theme="worldStatus[world.id]?.theme"
 					@click="handleCardClick(world)" />
 			</div>
 			<!-- 互動視窗 -->
@@ -32,8 +33,8 @@ import FloatingButtons from "./components/FloatingButtons.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
-import { calculateWorldStatus } from "./utils/worldCycleCalculator";
-import type { ModalExpose, RawWorldCycle, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./types/world";
+import { calculateWorldStatus, normalizeWorldCycle } from "./domain/worldCycles";
+import type { ModalExpose, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./domain/worldCycles";
 
 dayjs.extend(timezone);
 
@@ -61,32 +62,13 @@ let updateTimerId: ReturnType<typeof setInterval> | null = null;
 const modalComponent = ref<ModalExpose | null>(null);
 const selectedWorld = ref<WorldCycle | null>(null);
 
-// 從原始資料根據語言提取資料
-const getLocalizedValue = (
-	world: RawWorldCycle,
-	key: "name" | "dayStatusName" | "nightStatusName",
-	currentLocale: string
-): string => {
-	const localizedKey = `${key}_${currentLocale}` as keyof RawWorldCycle;
-	return String(world[localizedKey] || world[key] || "");
-};
-
 const transformWorldData = (currentLocale: string): WorldCycle[] => {
 	console.debug(`Transforming world data to ${currentLocale}`);
 	if (!rawWorldData.value) return [];
 
-	return Object.entries(rawWorldData.value.worlds).map(([id, world]) => ({
-		id,
-		name: getLocalizedValue(world, "name", currentLocale), // 動態根據語言選取名稱
-		dayStatusName: getLocalizedValue(world, "dayStatusName", currentLocale),
-		nightStatusName: getLocalizedValue(world, "nightStatusName", currentLocale),
-		dayIcon: world.dayIcon,
-		nightIcon: world.nightIcon,
-		startTime: dayjs(world.startTime).tz(userTimeZone),
-		loopTime: world.loopTime,
-		dayTime: world.dayTime,
-		nightTime: world.nightTime,
-	}));
+	return Object.entries(rawWorldData.value.worlds).map(([id, world]) =>
+		normalizeWorldCycle(id, world, { t })
+	);
 };
 
 // 從 JSON 獲取世界資料（僅讀取一次）
@@ -176,7 +158,7 @@ watch(
 watch(locale, () => {
 	console.debug(`Language switched to: ${locale.value}`);
 	worlds.value = transformWorldData(String(locale.value)); // 僅更新語言變化
-	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t }); // 立即同步狀態，避免切換語言瞬間不一致
+	worldStatus.value = calculateWorldStatus(worlds.value, { t }); // 立即同步狀態，避免切換語言瞬間不一致
 	updateDocumentTitle();
 	updateManifestLink();
 
@@ -184,6 +166,9 @@ watch(locale, () => {
 	if (selectedWorld.value) {
 		const selectedWorldId = selectedWorld.value.id;
 		selectedWorld.value = worlds.value.find((world) => world.id === selectedWorldId) || null;
+		if (selectedWorld.value && modalComponent.value) {
+			modalComponent.value.updateData(selectedWorld.value);
+		}
 	}
 });
 
@@ -192,10 +177,10 @@ onMounted(async () => {
 	updateDocumentTitle();
 	updateManifestLink();
 	await fetchWorldsData();
-	worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
+	worldStatus.value = calculateWorldStatus(worlds.value, { t });
 	updateTimeAndTimezone();
 	updateTimerId = setInterval(() => {
-		worldStatus.value = calculateWorldStatus(worlds.value, userTimeZone, { t });
+		worldStatus.value = calculateWorldStatus(worlds.value, { t });
 		updateTimeAndTimezone();
 	}, 1000);
 });
