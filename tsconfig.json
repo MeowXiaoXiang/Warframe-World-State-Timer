@@ -16,6 +16,6 @@
     "noUnusedParameters": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "scripts/**/*.ts", "vite.config.ts"],
   "references": []
 }
