@@ -1,7 +1,7 @@
 {
   "name": "Warframe World Cycle Schedule",
   "short_name": "Warframe Timer",
-  "description": "Warframe world cycle tracker for Plains of Eidolon, Orb Vallis, Cambion Drift, and Zariman.",
+  "description": "Warframe world cycle tracker for Plains of Eidolon, Orb Vallis, Cambion Drift, Zariman, and Duviri.",
   "theme_color": "#333333",
   "background_color": "#121212",
   "display": "standalone",

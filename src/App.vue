@@ -97,6 +97,11 @@ const updateDocumentTitle = () => {
 	document.title = t("app.siteName");
 };
 
+// 同步文件語言，讓瀏覽器與輔助工具知道目前顯示語言
+const updateDocumentLanguage = () => {
+	document.documentElement.lang = locale.value === "en-US" ? "en" : "zh-Hant";
+};
+
 // 依語言切換 PWA manifest
 const updateManifestLink = () => {
 	const manifestElement = document.getElementById("app-manifest");
@@ -160,6 +165,7 @@ watch(locale, () => {
 	worlds.value = transformWorldData(String(locale.value)); // 僅更新語言變化
 	worldStatus.value = calculateWorldStatus(worlds.value, { t }); // 立即同步狀態，避免切換語言瞬間不一致
 	updateDocumentTitle();
+	updateDocumentLanguage();
 	updateManifestLink();
 
 	// 若互動視窗有綁定世界，切語言後同步到新語言物件
@@ -175,6 +181,7 @@ watch(locale, () => {
 // 初始化
 onMounted(async () => {
 	updateDocumentTitle();
+	updateDocumentLanguage();
 	updateManifestLink();
 	await fetchWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, { t });
