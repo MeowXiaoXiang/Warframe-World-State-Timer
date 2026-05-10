@@ -5,6 +5,7 @@ export function positiveModulo(value: number, divisor: number): number {
 		throw new Error("positiveModulo requires a finite positive divisor.");
 	}
 
+	// JavaScript 的 % 會保留負號；epoch 前的時間也要能正確落在上一輪循環。
 	return ((value % divisor) + divisor) % divisor;
 }
 
@@ -53,6 +54,7 @@ export function getActiveWorldState(
 
 		if (positionMs < stateEndOffsetMs) {
 			const nextStateIndex = (stateIndex + 1) % world.states.length;
+			// 用 nowMs 回推/前推實際邊界，避免另外做 epoch + loop index 的重複計算。
 			const startedAtMs = nowMs - (positionMs - stateStartOffsetMs);
 			const endsAtMs = nowMs + (stateEndOffsetMs - positionMs);
 

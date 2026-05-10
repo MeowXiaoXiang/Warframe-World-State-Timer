@@ -4,6 +4,7 @@ import type { CycleEntry, CycleStatusClass, ScheduleRange, WorldCycle } from "./
 
 export function getDefaultScheduleRange(now = dayjs()): ScheduleRange {
 	return {
+		// 多抓前後半天，讓跨午夜或從前一天延續到今天的狀態仍能被推演後再過濾。
 		startMs: now.startOf("day").subtract(1, "day").add(12, "hour").valueOf(),
 		endMs: now.startOf("day").add(2, "day").add(12, "hour").valueOf(),
 	};
@@ -18,6 +19,7 @@ export function calculateCycleEntries(world: WorldCycle, range: ScheduleRange): 
 
 	const entries: CycleEntry[] = [];
 	const loopDurationMs = world.loopDurationMs;
+	// 從 range.start 所在的那一輪開始推，保留與 range 起點重疊但較早開始的 state。
 	let cycleStartMs =
 		world.epochMs +
 		Math.floor((range.startMs - world.epochMs) / loopDurationMs) * loopDurationMs;
@@ -60,6 +62,7 @@ export function filterEntriesForTodayAndTomorrow(
 	const todayStartMs = now.startOf("day").valueOf();
 	const tomorrowEndMs = now.startOf("day").add(1, "day").endOf("day").valueOf();
 
+	// 保留既有 UI 行為：只顯示「開始時間」落在今天或明天的項目。
 	return entries.filter((entry) => entry.startMs >= todayStartMs && entry.startMs < tomorrowEndMs);
 }
 
