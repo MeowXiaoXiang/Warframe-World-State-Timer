@@ -23,7 +23,7 @@ v2 的目標不是替 day/night 補特例，而是把核心模型改成任意狀
 
 ```text
 WorldCycle = epochMs + states[]
-WorldState = key + durationMs + icon
+WorldState = key + durationMs + icon + theme
 ```
 
 計算時只需要：
@@ -40,7 +40,7 @@ nextState = states[(currentIndex + 1) % states.length]
 
 ## 新資料格式
 
-`public/data/world_cycles.json` 將升級為 v2 schema。
+`public/data/world_cycles.json` 將升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
 
 ```json
 {
@@ -49,8 +49,24 @@ nextState = states[(currentIndex + 1) % states.length]
     "plains_earth": {
       "epochMs": 1766129867176,
       "states": [
-        { "key": "day", "durationMs": 5998874, "icon": "☀️" },
-        { "key": "night", "durationMs": 3000000, "icon": "🌙" }
+        {
+          "key": "day",
+          "durationMs": 5998874,
+          "icon": "☀️",
+          "theme": {
+            "light": { "accent": "#f6a623", "surface": "#ffe2a6", "text": "#5f3b00" },
+            "dark": { "accent": "#ffbf47", "surface": "#4a320d", "text": "#ffe8a3" }
+          }
+        },
+        {
+          "key": "night",
+          "durationMs": 3000000,
+          "icon": "🌙",
+          "theme": {
+            "light": { "accent": "#6674e8", "surface": "#dde3ff", "text": "#243187" },
+            "dark": { "accent": "#93a2ff", "surface": "#202a62", "text": "#eef1ff" }
+          }
+        }
       ]
     },
     "orb": {
@@ -63,11 +79,11 @@ nextState = states[(currentIndex + 1) % states.length]
     "duviri": {
       "epochMs": 1766138452676,
       "states": [
-        { "key": "joy", "durationMs": 7200000, "icon": "./images/duviri/joy.png" },
-        { "key": "anger", "durationMs": 7200000, "icon": "./images/duviri/anger.png" },
-        { "key": "envy", "durationMs": 7200000, "icon": "./images/duviri/envy.png" },
-        { "key": "sorrow", "durationMs": 7200000, "icon": "./images/duviri/sorrow.png" },
-        { "key": "fear", "durationMs": 7200000, "icon": "./images/duviri/fear.png" }
+        { "key": "joy", "durationMs": 7200000, "icon": "./images/states/duviri/joy.png" },
+        { "key": "anger", "durationMs": 7200000, "icon": "./images/states/duviri/anger.png" },
+        { "key": "envy", "durationMs": 7200000, "icon": "./images/states/duviri/envy.png" },
+        { "key": "sorrow", "durationMs": 7200000, "icon": "./images/states/duviri/sorrow.png" },
+        { "key": "fear", "durationMs": 7200000, "icon": "./images/states/duviri/fear.png" }
       ]
     }
   }
@@ -149,20 +165,36 @@ nextState = states[(currentIndex + 1) % states.length]
 
 ```json
 { "icon": "☀️" }
-{ "icon": "./images/factions/grineer.svg" }
-{ "icon": "./images/duviri/joy.png" }
+{ "icon": "./images/states/zariman/grineer.svg" }
+{ "icon": "./images/states/duviri/joy.png" }
 ```
 
 若未來需要統一圖示風格，再改成 `iconKey` 搭配 `iconRegistry.ts`。
 
 ## 資料來源與限制
 
-本地參考資料來自 Warframe Wiki 的 raw template，保存在本機但不提交：
+本地參考資料來自 Warframe Wiki 的 raw template / gadget，保存在本機但不提交：
 
 - `wiki.warframe.com.rawcode`
 - `wiki.warframe.com.js`
 
 這些檔案已加入 `.git/info/exclude`，不放進 repo。
+
+### 來源分級
+
+主要資料來源：
+
+- [Template:CycleClock raw](https://wiki.warframe.com/index.php?title=Template%3ACycleClock&action=raw)
+  - 用於 Plains of Eidolon / Earth、Orb Vallis、Cambion Drift、Duviri 的 `epochMs`、狀態持續時間與 state messages。
+- [Template:Mainpage Box Timers](https://wiki.warframe.com/w/Template:Mainpage_Box_Timers)
+  - 用於確認首頁公開 timer 清單。
+  - 用於 Zariman 這類 `Countdown` 型 timer 的 `date`、`looptime`、`delaytime`。
+
+行為參考：
+
+- [MediaWiki:Gadget-CycleClock.js](https://wiki.warframe.com/w/MediaWiki:Gadget-CycleClock.js)
+  - 僅參考 Wiki 如何呈現 cycle clock。
+  - 不作為校準資料來源，不複製其 JS/CSS 實作。
 
 ### CycleClock 類資料
 
@@ -203,8 +235,8 @@ delaytime = 9000
 {
   "epochMs": 1738845270000,
   "states": [
-    { "key": "grineer", "durationMs": 9000000, "icon": "./images/factions/grineer.svg" },
-    { "key": "corpus", "durationMs": 9000000, "icon": "./images/factions/corpus.svg" }
+    { "key": "grineer", "durationMs": 9000000, "icon": "./images/states/zariman/grineer.svg" },
+    { "key": "corpus", "durationMs": 9000000, "icon": "./images/states/zariman/corpus.svg" }
   ]
 }
 ```
@@ -230,6 +262,7 @@ export interface RawWorldState {
   key: string;
   durationMs: number;
   icon?: string;
+  theme: WorldStateTheme;
 }
 
 export interface WorldCycle {
@@ -245,6 +278,18 @@ export interface WorldState {
   label: string;
   icon?: string;
   durationMs: number;
+  theme: WorldStateTheme;
+}
+
+export interface WorldStateTheme {
+  light: WorldStatePalette;
+  dark: WorldStatePalette;
+}
+
+export interface WorldStatePalette {
+  accent: string;
+  surface: string;
+  text: string;
 }
 
 export interface ActiveWorldState {
@@ -257,6 +302,8 @@ export interface ActiveWorldState {
   endsAtMs: number;
   elapsedMs: number;
   remainingMs: number;
+  positionMs: number;
+  loopDurationMs: number;
 }
 
 export interface CycleEntry {
@@ -265,8 +312,11 @@ export interface CycleEntry {
   stateIndex: number;
   label: string;
   icon?: string;
+  theme: WorldStateTheme;
   start: Dayjs;
   end: Dayjs;
+  startMs: number;
+  endMs: number;
   statusClass?: CycleStatusClass;
 }
 ```
@@ -314,7 +364,7 @@ Tomorrow
 
 ### Phase 1: v2 型別與資料
 
-- 重寫 `src/types/world.ts`。
+- 新增 `src/domain/worldCycles/types.ts`。
 - 將 `public/data/world_cycles.json` 改成 v2 schema。
 - 將世界名稱與 state label 移到 `src/locales/zh-TW.json`、`src/locales/en.json`。
 - 暫時不重構 UI，先讓 TypeScript 型別可以表達 v2 資料。
@@ -324,9 +374,10 @@ Tomorrow
 - 新增或重構 cycle engine utility。
 - 實作：
   - positive modulo
-  - `getCurrentWorldState(world, nowMs)`
-  - `calculateWorldStatus(worlds, userTimeZone, i18n)`
-  - `calculateCycles(world, range)`
+  - `getActiveWorldState(world, nowMs)`
+  - `calculateWorldStatus(worlds, i18n, nowMs?)`
+  - `calculateCycleEntries(world, range)`
+  - `assignCycleStatuses(entries, nowMs?)`
 - 全部以毫秒計算，顯示時再格式化。
 
 ### Phase 3: Timeline Modal
@@ -353,10 +404,21 @@ Tomorrow
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm test
 pnpm type-check
+pnpm verify:cycles
 pnpm build
 git diff --check
 ```
+
+## 目前實作狀態
+
+- 已建立 `src/domain/worldCycles/`，包含 engine、schedule、status、normalize 與型別。
+- 已將 `public/data/world_cycles.json` 升級為 v2 schema。
+- 已加入 Duviri 五段 Mood Spiral：`joy`、`anger`、`envy`、`sorrow`、`fear`。
+- 已將循環狀態圖片整理到 `public/images/states/{world}/`。
+- 已讓 Card / Modal 讀取通用 `states[]`，Modal 改成日期分組 timeline。
+- 已新增 Vitest 測試與 `pnpm verify:cycles` 驗證腳本。
 
 - production preview 檢查：
 
