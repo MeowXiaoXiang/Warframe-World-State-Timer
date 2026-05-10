@@ -138,8 +138,8 @@ const clearSelectedWorld = () => {
 watch(
 	() => {
 		const selectedWorldId = selectedWorld.value?.id;
-		return selectedWorldId ? worldStatus.value[selectedWorldId]?.status : undefined;
-	}, // 偵測 selectedWorld 的 status
+		return selectedWorldId ? worldStatus.value[selectedWorldId]?.stateKey : undefined;
+	}, // 偵測 selectedWorld 的 state key
 	(newStatus, oldStatus) => {
 		if (!modalComponent.value || !selectedWorld.value) return;
 
