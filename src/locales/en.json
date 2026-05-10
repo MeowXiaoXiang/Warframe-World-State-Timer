@@ -29,5 +29,45 @@
   },
   "header": {
     "installApp": "Install App"
+  },
+  "worlds": {
+    "plains_earth": {
+      "name": "Plains of Eidolon & Earth",
+      "states": {
+        "day": "Day",
+        "night": "Night"
+      }
+    },
+    "orb": {
+      "name": "Orb Vallis",
+      "states": {
+        "warm": "Warm",
+        "cold": "Cold"
+      }
+    },
+    "cambion": {
+      "name": "Cambion Drift",
+      "states": {
+        "fass": "Fass",
+        "vome": "Vome"
+      }
+    },
+    "zariman": {
+      "name": "Zariman Ten Zero",
+      "states": {
+        "grineer": "Grineer",
+        "corpus": "Corpus"
+      }
+    },
+    "duviri": {
+      "name": "Duviri",
+      "states": {
+        "joy": "Joy",
+        "anger": "Anger",
+        "envy": "Envy",
+        "sorrow": "Sorrow",
+        "fear": "Fear"
+      }
+    }
   }
 }
