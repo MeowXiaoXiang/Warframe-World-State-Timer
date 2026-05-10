@@ -435,7 +435,7 @@ http://127.0.0.1:4173/Warframe-World-State-Timer/
 ## 暫不處理
 
 - 不重寫 PWA manifest。
-- 不刪除 `old-version`。
+- 不刪除舊版純靜態站；已移至 `archive/legacy-static-site` 作為歷史封存。
 - 不把 Wiki rawcode/js 提交到 repo。
 - 不把 Daily/Weekly Reset、Baro、Ergo、Eleanor 納入 `WorldCycle`。
 - 不先做 icon registry。

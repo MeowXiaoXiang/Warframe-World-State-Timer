@@ -142,4 +142,4 @@ pnpm build
 
 ## 版本更新
 
-此專案曾經是純 HTML、CSS 和 JavaScript 版本，並且已經更新為基於 Vue 3 的版本，提供更多的交互功能，例如語言切換、主題切換等。舊版的純 HTML、CSS、JS 版本仍然保留在 `old-version` 資料夾中，方便需要的開發者參考。
+此專案曾經是純 HTML、CSS 和 JavaScript 版本，並且已經更新為基於 Vue 3 的版本，提供更多的交互功能，例如語言切換與主題切換等。舊版純靜態站已封存在 `archive/legacy-static-site`，方便需要時對照早期實作。
