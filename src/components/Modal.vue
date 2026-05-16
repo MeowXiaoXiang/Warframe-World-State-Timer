@@ -2,21 +2,18 @@
     <div class="modal fade" tabindex="-1" role="dialog" ref="modal" :aria-hidden="!isVisible">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <!-- 標題 -->
                 <div class="modal-header" :class="isDarkTheme ? 'bg-dark text-light' : 'bg-light text-dark'">
                     <h5 class="modal-title">
                         {{ t("modal.title") }} - <span>{{ localWorld?.name }}</span>
                     </h5>
                     <button type="button" class="btn-close" :class="{ 'btn-close-white': isDarkTheme }" aria-label="Close" @click="closeModal"></button>
                 </div>
-                <!-- 圖例 -->
                 <div class="modal-legend" :class="isDarkTheme ? 'bg-dark text-light' : 'bg-light text-dark'">
                     <span class="legend-item status-not-started">{{ t("modal.legend.notStarted") }}</span>
                     <span class="legend-item status-next">{{ t("modal.legend.next") }}</span>
                     <span class="legend-item status-ongoing">{{ t("modal.legend.ongoing") }}</span>
                     <span class="legend-item status-ended">{{ t("modal.legend.ended") }}</span>
                 </div>
-                <!-- 狀態序列 -->
                 <div class="modal-state-strip">
                     <span
                         v-for="state in localWorld?.states"
@@ -35,7 +32,6 @@
                         {{ state.label }}
                     </span>
                 </div>
-                <!-- 滾動內容 -->
                 <div class="modal-body" :class="isDarkTheme ? 'text-light' : 'text-dark'">
                     <template v-for="(cycles, date) in localGroupedCycles" :key="date">
                         <div class="schedule-date">{{ date }}</div>
@@ -108,14 +104,12 @@ const getStateStyle = (theme: WorldStateTheme): Record<string, string> => {
     };
 };
 
-// Props
 defineProps<{
     world?: WorldCycle | null;
 }>();
 
-// Ref & Variables
 const modal = ref<HTMLElement | null>(null);
-const isVisible = ref(false); // 是否顯示互動視窗
+const isVisible = ref(false);
 let bootstrapModal: BootstrapModal | null = null;
 const localWorld = ref<WorldCycle | null>(null);
 const localGroupedCycles = ref<GroupedCycleEntries>({});
@@ -130,12 +124,10 @@ onMounted(() => {
             keyboard: true,
         });
 
-        // 當模態框完全關閉時觸發清除
         modal.value.addEventListener("hidden.bs.modal", () => {
-            console.debug("Modal completely closed, clearing local data...");
             isVisible.value = false;
             clearLocalData();
-            emit("modal-closed"); // 通知父組件
+            emit("modal-closed");
         });
     }
 });
@@ -143,10 +135,8 @@ onMounted(() => {
 const clearLocalData = () => {
     localWorld.value = null;
     localGroupedCycles.value = {};
-    console.debug("Local data cleared in Modal.vue.");
 };
 
-// 更新分組數據
 const updateGroupedCycles = (world: WorldCycle) => {
     if (!world) return;
     const rawCycles = calculateCycleEntries(world, getDefaultScheduleRange());
@@ -162,7 +152,6 @@ const updateGroupedCycles = (world: WorldCycle) => {
     localGroupedCycles.value = grouped;
 };
 
-// 開啟互動視窗
 const openModal = (data: { world?: WorldCycle } | null) => {
     if (!bootstrapModal) {
         console.warn("Bootstrap modal is not initialized.");
@@ -175,7 +164,6 @@ const openModal = (data: { world?: WorldCycle } | null) => {
     }
 
     isVisible.value = true;
-    // 更新資料僅當目標世界不同時
     if (!localWorld.value || localWorld.value.id !== data.world.id) {
         setWorldAndCycles(data.world);
     }
@@ -183,32 +171,26 @@ const openModal = (data: { world?: WorldCycle } | null) => {
     bootstrapModal.show();
 };
 
-// 更新互動視窗數據
 const setWorldAndCycles = (world: WorldCycle) => {
     localWorld.value = world;
     updateGroupedCycles(world);
 };
 
-// 更新當前已開啟的互動視窗資料
 const updateData = (world: WorldCycle) => {
     if (!bootstrapModal) {
         console.warn("updateData called when modal is not initialized.");
         return;
     }
 
-    console.debug("Updating modal data...");
     setWorldAndCycles(world);
 };
 
-
-// 關閉互動視窗
 const closeModal = () => {
     if (!bootstrapModal) return;
-    isVisible.value = false; // 設定不可見狀態
-    bootstrapModal.hide(); // 只調用 Bootstrap 的隱藏方法
+    isVisible.value = false;
+    bootstrapModal.hide();
 };
 
-// 暴露方法
 defineExpose({
     openModal,
     closeModal,
@@ -239,7 +221,6 @@ defineExpose({
     opacity: 0.5;
 }
 
-/* === 狀態序列樣式 === */
 .modal-state-strip {
     display: flex;
     justify-content: center;
@@ -286,7 +267,6 @@ defineExpose({
     border-color: color-mix(in srgb, var(--state-accent) 52%, transparent);
 }
 
-/* === 互動視窗滾動內容 === */
 .modal-body {
     max-height: calc(100dvh - 220px);
     overflow-y: auto;
@@ -304,7 +284,6 @@ defineExpose({
     color: #dfe6f1;
 }
 
-/* === 日期標題樣式 === */
 .schedule-date {
     font-size: 1.4rem;
     font-weight: bold;
@@ -324,7 +303,6 @@ defineExpose({
     border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
-/* === 時間線樣式 === */
 .timeline-list {
     display: flex;
     flex-direction: column;
@@ -392,9 +370,6 @@ defineExpose({
     border-left-color: var(--state-accent);
 }
 
-/* === 狀態樣式 === */
-
-/* === 淺色主題 === */
 .status-not-started {
     background-color: #c2bbbb !important;
     color: #302f2f !important;
@@ -415,7 +390,6 @@ defineExpose({
     color: #8a0037 !important;
 }
 
-/* === 深色主題 === */
 [data-theme="dark"] .status-not-started {
     background-color: #4a505a !important;
     color: #d0d7e2 !important;
@@ -436,7 +410,6 @@ defineExpose({
     color: #ffe0ee !important;
 }
 
-/* === 圖例區域樣式 === */
 .modal-legend {
     display: flex;
     justify-content: space-around;
@@ -465,8 +438,6 @@ defineExpose({
     background-color: #4a505a;
 }
 
-/* === 滾動條樣式 === */
-/* 淺色主題滾動條 */
 .modal-body::-webkit-scrollbar {
     width: 10px;
 }
@@ -486,7 +457,6 @@ defineExpose({
     background: #a8a8a8;
 }
 
-/* 深色主題滾動條 */
 [data-theme="dark"] .modal-body::-webkit-scrollbar-track {
     background: #262c34;
     border-radius: 6px;
@@ -501,8 +471,6 @@ defineExpose({
 [data-theme="dark"] .modal-body::-webkit-scrollbar-thumb:hover {
     background: #747f8f;
 }
-
-/* Firefox 滾動條樣式 */
 
 .modal-body {
     scrollbar-width: thin;

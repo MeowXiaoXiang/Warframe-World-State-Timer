@@ -6,26 +6,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-// 是否顯示 Loading 畫面
 const visible = ref(true);
 
-// 回報給 App.vue ， 讓其知道 Loading 畫面已結束
 const emit = defineEmits<{
     "loading-complete": [];
 }>();
 
-// 模擬載入完成
 onMounted(() => {
-    const minDuration = 1000; // 最小動畫持續時間 (1 秒)
+    const minDuration = 1000;
     const startTime = Date.now();
 
-    // 確保動畫持續至少 1 秒
     const completeLoading = () => {
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(minDuration - elapsedTime, 0);
 
         setTimeout(() => {
-            visible.value = false; // 隱藏 Loading 畫面
+            visible.value = false;
             emit("loading-complete");
         }, remainingTime);
     };
@@ -36,7 +32,6 @@ onMounted(() => {
 
 
 <style scoped>
-/* Loading 全屏覆蓋背景 */
 #loading-overlay {
     --loading-bg-start: #dfeafe;
     --loading-bg-mid: #f5f9ff;
@@ -52,11 +47,11 @@ onMounted(() => {
     justify-content: center;
     z-index: 1050;
     opacity: 1;
-    transition: opacity 0.5s ease-in-out; /* 淡出動畫 */
+    transition: opacity 0.5s ease-in-out;
     background: linear-gradient(90deg, var(--loading-bg-start), var(--loading-bg-mid), var(--loading-bg-end));
     background-size: 200% 200%;
-    animation: gradient 2s ease infinite; /* 背景漸變動畫 */
-    pointer-events: all; /* 避免在 Loading 狀態下點擊 */
+    animation: gradient 2s ease infinite;
+    pointer-events: all;
 }
 
 #loading-overlay::before {
@@ -76,25 +71,23 @@ onMounted(() => {
 }
 
 #loading-overlay.transparent {
-    opacity: 0; /* 完全透明 */
-    pointer-events: none; /* 禁止事件傳遞 */
+    opacity: 0;
+    pointer-events: none;
 }
 
-/* Loading 圖標樣式 */
 #loading-icon {
     position: relative;
     z-index: 1;
     width: 120px;
     height: 120px;
     filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.2));
-    animation: bounce 1s ease-in-out infinite; /* 彈跳動畫 */
+    animation: bounce 1s ease-in-out infinite;
 }
 
 [data-theme="dark"] #loading-icon {
     filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
 }
 
-/* 背景漸變動畫 */
 @keyframes gradient {
     0%, 100% {
         background-position: 0% 50%;
@@ -104,7 +97,6 @@ onMounted(() => {
     }
 }
 
-/* 彈跳動畫 */
 @keyframes bounce {
     0%, 100% {
         transform: translateY(0);

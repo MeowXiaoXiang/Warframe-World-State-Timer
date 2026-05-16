@@ -1,8 +1,6 @@
 <template>
 	<div id="app" class="container">
-		<!-- Loading 畫面 -->
 		<LoadingComponent v-show="loadingVisible" @loading-complete="onLoadingComplete" />
-		<!-- 主內容 -->
 		<div id="main-content" :class="{ visible: !loadingVisible }">
 			<HeaderBar :site-name="t('app.siteName')" :current-time="currentTime" :current-timezone="currentTimezone" />
 			<div id="card-container" class="container">
@@ -12,11 +10,8 @@
 					:theme="worldStatus[world.id]?.theme"
 					@click="handleCardClick(world)" />
 			</div>
-			<!-- 互動視窗 -->
 			<ModalComponent ref="modalComponent" :world="selectedWorld" @modal-closed="clearSelectedWorld" />
-			<!-- 懸浮按鈕 -->
 			<FloatingButtons />
-			<!-- 頁尾 -->
 			<FooterComponent />
 		</div>
 	</div>
@@ -33,19 +28,17 @@ import FloatingButtons from "./components/FloatingButtons.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
-import worldCyclesData from "./data/world_cycles.json";
 import { calculateWorldStatus, normalizeWorldCycle } from "./domain/worldCycles";
 import type { ModalExpose, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./domain/worldCycles";
 
 dayjs.extend(timezone);
 
-const { locale, t } = useI18n(); // 使用 vue-i18n
+const { locale, t } = useI18n();
 
-// 全局狀態
 const loadingVisible = ref(true);
-const worlds = ref<WorldCycle[]>([]); // 保存處理後的世界資料
-const rawWorldData = worldCyclesData as RawWorldCyclesData; // 編譯進 bundle 的原始 world_cycles.json 資料
-const worldStatus = ref<WorldStatusMap>({}); // 動態狀態資料
+const worlds = ref<WorldCycle[]>([]);
+const rawWorldData = ref<RawWorldCyclesData | null>(null);
+const worldStatus = ref<WorldStatusMap>({});
 const currentTime = ref("");
 const currentTimezone = ref("");
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -59,22 +52,23 @@ const timeZoneShortFormatter = new Intl.DateTimeFormat("en-US", {
 });
 let updateTimerId: ReturnType<typeof setInterval> | null = null;
 
-// 管理互動視窗狀態
 const modalComponent = ref<ModalExpose | null>(null);
 const selectedWorld = ref<WorldCycle | null>(null);
 
 const transformWorldData = (): WorldCycle[] => {
-	return Object.entries(rawWorldData.worlds).map(([id, world]) =>
+	if (!rawWorldData.value) return [];
+
+	return Object.entries(rawWorldData.value.worlds).map(([id, world]) =>
 		normalizeWorldCycle(id, world, { t })
 	);
 };
 
-// 初始化編譯進 bundle 的世界資料
-const loadWorldsData = () => {
-	worlds.value = transformWorldData(); // 初始化為當前語言
+const fetchWorldsData = async () => {
+	const response = await fetch(`${import.meta.env.BASE_URL}data/world_cycles.json`);
+	rawWorldData.value = await response.json();
+	worlds.value = transformWorldData();
 };
 
-// 更新當前時間和時區
 const updateTimeAndTimezone = () => {
 	currentTime.value = dayjs().tz(userTimeZone).format("YYYY/MM/DD HH:mm:ss");
 	const timeZoneOffset =
@@ -88,17 +82,14 @@ const updateTimeAndTimezone = () => {
 	currentTimezone.value = `${userTimeZone} (${timeZoneOffset})`;
 };
 
-// 同步更新瀏覽器分頁標題
 const updateDocumentTitle = () => {
 	document.title = t("app.siteName");
 };
 
-// 同步文件語言，讓瀏覽器與輔助工具知道目前顯示語言
 const updateDocumentLanguage = () => {
 	document.documentElement.lang = locale.value === "en-US" ? "en" : "zh-Hant";
 };
 
-// 依語言切換 PWA manifest
 const updateManifestLink = () => {
 	const manifestElement = document.getElementById("app-manifest");
 	if (!manifestElement) return;
@@ -109,7 +100,6 @@ const updateManifestLink = () => {
 	manifestElement.setAttribute("href", `${import.meta.env.BASE_URL}${manifestName}`);
 };
 
-// 處理卡片點擊事件
 const handleCardClick = (world: WorldCycle) => {
 	if (!modalComponent.value) {
 		console.error("ModalComponent not found");
@@ -120,51 +110,39 @@ const handleCardClick = (world: WorldCycle) => {
 	selectedWorld.value = world;
 };
 
-// 初始載入
 const onLoadingComplete = () => {
 	loadingVisible.value = false;
 };
 
-// 關閉互動視窗後自動清除 App.vue 端的所需資料
 const clearSelectedWorld = () => {
 	selectedWorld.value = null;
 };
 
-// 監控 selectedWorld 的狀態變化
 watch(
 	() => {
 		const selectedWorldId = selectedWorld.value?.id;
 		return selectedWorldId ? worldStatus.value[selectedWorldId]?.stateKey : undefined;
-	}, // 偵測 selectedWorld 的 state key
+	},
 	(newStatus, oldStatus) => {
 		if (!modalComponent.value || !selectedWorld.value) return;
 
-		// 當 oldStatus 不存在，僅記錄而不更新
 		if (!oldStatus) {
-			console.debug("Skip initial modal update.");
 			return;
 		}
 
-		// 僅在狀態變化時觸發更新
 		if (newStatus !== oldStatus) {
-			console.debug(
-				`world: ${selectedWorld.value.name} status updated, triggering modal update`
-			);
 			modalComponent.value.updateData(selectedWorld.value);
 		}
 	}
 );
 
-// 監控語言變化，切換語言（修改為僅更新處理後的資料）
 watch(locale, () => {
-	console.debug(`Language switched to: ${locale.value}`);
-	worlds.value = transformWorldData(); // 僅更新語言變化
-	worldStatus.value = calculateWorldStatus(worlds.value, { t }); // 立即同步狀態，避免切換語言瞬間不一致
+	worlds.value = transformWorldData();
+	worldStatus.value = calculateWorldStatus(worlds.value, { t });
 	updateDocumentTitle();
 	updateDocumentLanguage();
 	updateManifestLink();
 
-	// 若互動視窗有綁定世界，切語言後同步到新語言物件
 	if (selectedWorld.value) {
 		const selectedWorldId = selectedWorld.value.id;
 		selectedWorld.value = worlds.value.find((world) => world.id === selectedWorldId) || null;
@@ -174,12 +152,11 @@ watch(locale, () => {
 	}
 });
 
-// 初始化
-onMounted(() => {
+onMounted(async () => {
 	updateDocumentTitle();
 	updateDocumentLanguage();
 	updateManifestLink();
-	loadWorldsData();
+	await fetchWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, { t });
 	updateTimeAndTimezone();
 	updateTimerId = setInterval(() => {

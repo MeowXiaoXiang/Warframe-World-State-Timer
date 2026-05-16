@@ -1,8 +1,10 @@
-# State Cycle Engine v2 設計與改寫計畫
+# State Cycle Engine v2 設計與實作紀錄
+
+本文件記錄 v2 world cycle engine 的設計脈絡、資料模型與目前實作狀態。README 保留使用者導向說明；這裡保留重構決策、資料來源分級與後續維護時需要理解的背景。
 
 ## 背景
 
-目前專案的世界循環資料與計算邏輯以 day/night 二狀態為核心：
+重構前，專案的世界循環資料與計算邏輯以 day/night 二狀態為核心：
 
 - `startTime`
 - `loopTime`
@@ -38,9 +40,9 @@ nextState = states[(currentIndex + 1) % states.length]
 
 `loopDurationMs` 由 `states[].durationMs` 加總取得，不再手寫。
 
-## 新資料格式
+## 資料格式
 
-`src/data/world_cycles.json` 將升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
+`public/data/world_cycles.json` 已升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
 
 ```json
 {
@@ -149,9 +151,9 @@ nextState = states[(currentIndex + 1) % states.length]
 
 ## 圖示策略
 
-第一版不建立 icon registry。
+目前不建立 icon registry。
 
-`icon` 暫時保留為 string，支援：
+`icon` 保留為 string，支援：
 
 - emoji 或純文字
 - public image path
@@ -245,7 +247,7 @@ delaytime = 9000
 
 Daily Reset、Weekly Reset、Baro、Ergo、Eleanor 等 countdown 不納入這一輪 `WorldCycle` 重構，避免模型過度膨脹。
 
-## TypeScript 型別構想
+## TypeScript 型別
 
 ```ts
 export interface RawWorldCyclesData {
@@ -339,7 +341,7 @@ icon
 
 Modal 從 day/night 雙欄改為通用 timeline。
 
-建議第一版：
+目前採用：
 
 ```text
 Today
@@ -353,21 +355,21 @@ Tomorrow
 
 桌面與手機先共用垂直列表，穩定後再考慮更精緻的水平時間軸。
 
-## 分階段改寫計畫
+## 分階段改寫紀錄
 
 ### Phase 0: Branch 與文件
 
 - 建立 `refactor/state-cycle-engine-v2` 分支。
 - 將 wiki rawcode/js 加入 `.git/info/exclude`。
 - 新增本文件記錄 v2 設計。
-- 不改 runtime 行為。
+- 此階段不改 runtime 行為。
 
 ### Phase 1: v2 型別與資料
 
 - 新增 `src/domain/worldCycles/types.ts`。
-- 將 `src/data/world_cycles.json` 改成 v2 schema。
+- 將 `public/data/world_cycles.json` 改成 v2 schema。
 - 將世界名稱與 state label 移到 `src/locales/zh-TW.json`、`src/locales/en.json`。
-- 暫時不重構 UI，先讓 TypeScript 型別可以表達 v2 資料。
+- 先讓 TypeScript 型別可以表達 v2 資料，再接 UI。
 
 ### Phase 2: Cycle Engine
 
@@ -414,7 +416,7 @@ git diff --check
 ## 目前實作狀態
 
 - 已建立 `src/domain/worldCycles/`，包含 engine、schedule、status、normalize 與型別。
-- 已將 `src/data/world_cycles.json` 升級為 v2 schema。
+- 已將 `public/data/world_cycles.json` 升級為 v2 schema。
 - 已加入 Duviri 五段 Mood Spiral：`joy`、`anger`、`envy`、`sorrow`、`fear`。
 - 已將循環狀態圖片整理到 `public/images/states/{world}/`。
 - 已讓 Card / Modal 讀取通用 `states[]`，Modal 改成日期分組 timeline。

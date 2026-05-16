@@ -1,14 +1,14 @@
 # Warframe 世界循環時間表網站
 
-這是一個 **[Warframe 世界循環時間表網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，專為 Warframe 玩家設計，提供即時準確的世界循環資訊。玩家可方便地查閱夜靈平野、奧布山谷、魔裔禁地、扎日曼號與渡域的目前狀態，以及下一次狀態切換的預期時間，協助規劃遊戲內活動。
+這是一個 **[Warframe 世界循環時間表網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，用來快速查看夜靈平野、奧布山谷、魔裔禁地、扎日曼號與渡域的目前狀態、剩餘時間，以及接下來的循環安排，方便玩家規劃遊戲內活動。
 
 ## 功能特色
 
-- 顯示各地區當前循環狀態。
+- 顯示各地區目前循環狀態與剩餘時間。
 - 支援二狀態與多狀態循環，例如渡域的五段 Mood Spiral。
-- 提供距離下一次狀態變化的倒計時，幫助玩家掌握時間節點。
-- 自動更新狀態與時間，保證資訊即時性。
-- 模態框功能顯示未來兩天內的狀態時間表，讓玩家提前規劃活動時間。
+- 每秒自動更新目前時間、時區與循環倒計時。
+- 點擊卡片可查看今天與明天的狀態時間表。
+- 支援繁體中文、英文、深色/淺色主題與 PWA 安裝。
 - 直觀的色彩標示：
   - **綠色**：當前進行中的狀態。
   - **橘色**：下一次即將開始的狀態。
@@ -17,20 +17,18 @@
 
 ## 使用技術
 
-- **HTML**：搭建網站結構，設計卡片與模態框的元素。
-- **CSS**：優化視覺效果，包括卡片樣式、狀態標示及顏色區分。
-- **TypeScript**：負責世界循環計算邏輯，動態更新顯示狀態及剩餘時間。
-- **Day.js**：處理時間與時區相關的計算，確保跨時區的準確性。
-- **Bootstrap 5**：提供排版與模態框的功能，增強網站的易用性。
-- **Vue.js 3**：用於開發互動式前端，實現了語言切換與主題切換功能。
-- **Vue I18n**：實現多語言支持，提供簡便的語言切換功能。
-- **Vite**：作為構建工具，提供快速的開發與構建體驗。
+- **Vue 3 + TypeScript**：建立互動式前端與世界循環核心計算邏輯。
+- **Vite**：負責開發伺服器與生產建置。
+- **Vitest**：測試世界循環計算、排程與資料正規化。
+- **Day.js**：處理時間與時區顯示。
+- **Bootstrap 5**：提供 modal、dropdown 等互動元件基礎。
+- **Vue I18n**：提供繁體中文與英文介面。
 - **vite-plugin-pwa**：提供 PWA（可安裝與離線快取）能力。
 - **pnpm 11**：使用快速且節省磁碟空間的依賴管理工具。
 
 ## 資料來源
 
-本專案的世界循環校準值主要參考 Warframe Wiki，並在本專案內轉換成 `epochMs + states[]` 的靜態資料。
+本專案使用本地 v2 循環資料作為執行時資料來源，不在前端即時解析官方 world state。循環校準值主要參考 Warframe Wiki，並整理成 `epochMs + states[]` 的靜態資料。
 
 1. **[Warframe Wiki: Template:CycleClock raw](https://wiki.warframe.com/index.php?title=Template%3ACycleClock&action=raw)**
 
@@ -48,15 +46,11 @@
     - 行為參考，不作為資料來源。
     - 僅用來理解 Wiki 前端如何呈現 cycle clock；本專案不複製其 JS/CSS 實作。
 
-補充：[Warframe Worldstate Parser (WFCD)](https://github.com/WFCD/warframe-worldstate-parser) 與 [Warframe 官方動態世界狀態 API](https://content.warframe.com/dynamic/worldState.php) 可作為理解 world state 的背景參考，但目前世界循環時間表不即時解析它們，而是以本地 v2 cycle data 為準。
+[Warframe Worldstate Parser (WFCD)](https://github.com/WFCD/warframe-worldstate-parser) 與 [Warframe 官方動態世界狀態 API](https://api.warframe.com/cdn/worldState.php) 可作為理解 world state 的背景參考；本專案目前只使用整理後的本地循環資料，避免前端執行時依賴外部 API 可用性。
 
 ### `world_cycles.json`
 
-主要資料來源位於 `src/data/world_cycles.json`，會在 build 時編譯進前端 bundle，讓 App 首屏與離線行為不依賴額外 fetch。
-
-為了保留既有 GitHub Pages 靜態 URL 的相容性，`public/data/world_cycles.json` 仍會隨部署輸出，但 App 本身不會從這個路徑載入資料。更新 cycle data 時，兩份檔案需要保持一致，`pnpm verify:cycles` 會檢查這件事。
-
-範例：
+主要資料檔位於 `public/data/world_cycles.json`。App 會從 GitHub Pages 靜態路徑載入這份 v2 循環資料，Service Worker 也會快取它，讓網站在重開與離線情境下更穩定。
 
 ```json
 {
@@ -93,9 +87,11 @@
 - **states**: 任意長度的狀態陣列，依序循環。
 - **key**: 狀態 key，對應 `src/locales/*.json` 的顯示文字。
 - **durationMs**: 該狀態持續時間，單位為毫秒。
-- **icon**: emoji 或 `public/` 下的圖片路徑。此資料會在 build 時編譯進前端 bundle。
+- **icon**: emoji 或 `public/` 下的圖片路徑。
 - **theme.light / theme.dark**: 狀態在淺色與深色模式下的識別色，包含 `accent`、`surface`、`text`。
 - 世界名稱與狀態翻譯存放於 `src/locales/zh-TW.json` 與 `src/locales/en.json`。
+
+更完整的 v2 cycle engine 設計與資料來源紀錄可見 [docs/state-cycle-engine-v2.md](docs/state-cycle-engine-v2.md)。
 
 ## 安裝與使用
 
@@ -111,7 +107,7 @@ corepack enable
 ### 安裝依賴
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 ### 開發模式
@@ -130,7 +126,7 @@ pnpm type-check
 pnpm verify:cycles
 ```
 
-`verify:cycles` 會驗證現有世界循環資料、確認 public 相容副本與編譯來源一致、渡域五段循環順序、未來時間表推演與基本效能。
+`verify:cycles` 會驗證現有世界循環資料、渡域五段循環順序、未來時間表推演與基本效能。
 
 ### 構建網站
 
@@ -138,15 +134,14 @@ pnpm verify:cycles
 pnpm build
 ```
 
-命令會 Build 並生成生產版本的網站，將輸出到 `./dist` 目錄。
+命令會產生生產版本網站，輸出到 `./dist` 目錄。
 
 ## PWA 支援
 
 - 已整合 Web App Manifest 與 Service Worker。
 - 部署後可在支援的瀏覽器中「安裝」到桌面或主畫面。
-- `world_cycles.json` 會編譯進前端 bundle，跟隨同一個 build 版本被 Service Worker 快取，降低額外 fetch 失敗風險。
-- `public/data/world_cycles.json` 保留為 legacy 靜態檔相容用途，不作為 App runtime 載入來源。
+- `world_cycles.json` 會透過 `StaleWhileRevalidate` 策略快取，提升重開速度與離線可用性。
 
 ## 版本更新
 
-此專案曾經是純 HTML、CSS 和 JavaScript 版本，並且已經更新為基於 Vue 3 的版本，提供更多的交互功能，例如語言切換與主題切換等。舊版純靜態站已封存在 `archive/legacy-static-site`，方便需要時對照早期實作。
+此專案曾經是純 HTML、CSS 和 JavaScript 版本，目前已改為 Vue 3 + TypeScript。舊版純靜態站封存在 `archive/legacy-static-site`，方便需要時對照早期實作。
