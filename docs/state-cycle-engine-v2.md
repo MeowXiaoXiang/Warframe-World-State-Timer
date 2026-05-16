@@ -237,13 +237,13 @@ delaytime = 9000
 {
   "epochMs": 1738845270000,
   "states": [
-    { "key": "grineer", "durationMs": 9000000, "icon": "./images/states/zariman/grineer.svg" },
-    { "key": "corpus", "durationMs": 9000000, "icon": "./images/states/zariman/corpus.svg" }
+    { "key": "corpus", "durationMs": 9000000, "icon": "./images/states/zariman/corpus.svg" },
+    { "key": "grineer", "durationMs": 9000000, "icon": "./images/states/zariman/grineer.svg" }
   ]
 }
 ```
 
-注意：Grineer / Corpus 的起始順序需要以現有站台行為或遊戲狀態再次確認。
+官方 world state 目前可取得 `ZarimanSyndicate` 的 bounty activation / expiry，但未直接暴露 Grineer / Corpus 當前佔據狀態。本地資料以 2026-05-16 遊戲內觀察到的 Grineer 狀態校準，因此將 `date` 視為 Corpus 段起點。
 
 Daily Reset、Weekly Reset、Baro、Ergo、Eleanor 等 countdown 不納入這一輪 `WorldCycle` 重構，避免模型過度膨脹。
 

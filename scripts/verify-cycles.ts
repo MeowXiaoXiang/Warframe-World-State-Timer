@@ -100,8 +100,8 @@ const legacyExpectations: Record<
 	zariman: {
 		epochMs: Date.parse("2025-02-06T12:34:30Z"),
 		states: [
-			{ key: "grineer", durationMs: 9000000 },
 			{ key: "corpus", durationMs: 9000000 },
+			{ key: "grineer", durationMs: 9000000 },
 		],
 	},
 };

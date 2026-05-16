@@ -122,23 +122,6 @@
             "epochMs": 1738845270000,
             "states": [
                 {
-                    "key": "grineer",
-                    "durationMs": 9000000,
-                    "icon": "./images/states/zariman/grineer.svg",
-                    "theme": {
-                        "light": {
-                            "accent": "#c04c2f",
-                            "surface": "#ffd7c9",
-                            "text": "#6d1f10"
-                        },
-                        "dark": {
-                            "accent": "#e0653d",
-                            "surface": "#3b1a12",
-                            "text": "#ffe1d6"
-                        }
-                    }
-                },
-                {
                     "key": "corpus",
                     "durationMs": 9000000,
                     "icon": "./images/states/zariman/corpus.svg",
@@ -152,6 +135,23 @@
                             "accent": "#63baff",
                             "surface": "#142f4f",
                             "text": "#e3f3ff"
+                        }
+                    }
+                },
+                {
+                    "key": "grineer",
+                    "durationMs": 9000000,
+                    "icon": "./images/states/zariman/grineer.svg",
+                    "theme": {
+                        "light": {
+                            "accent": "#c04c2f",
+                            "surface": "#ffd7c9",
+                            "text": "#6d1f10"
+                        },
+                        "dark": {
+                            "accent": "#e0653d",
+                            "surface": "#3b1a12",
+                            "text": "#ffe1d6"
                         }
                     }
                 }
