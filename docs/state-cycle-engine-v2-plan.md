@@ -40,7 +40,7 @@ nextState = states[(currentIndex + 1) % states.length]
 
 ## 新資料格式
 
-`public/data/world_cycles.json` 將升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
+`src/data/world_cycles.json` 將升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
 
 ```json
 {
@@ -365,7 +365,7 @@ Tomorrow
 ### Phase 1: v2 型別與資料
 
 - 新增 `src/domain/worldCycles/types.ts`。
-- 將 `public/data/world_cycles.json` 改成 v2 schema。
+- 將 `src/data/world_cycles.json` 改成 v2 schema。
 - 將世界名稱與 state label 移到 `src/locales/zh-TW.json`、`src/locales/en.json`。
 - 暫時不重構 UI，先讓 TypeScript 型別可以表達 v2 資料。
 
@@ -414,7 +414,7 @@ git diff --check
 ## 目前實作狀態
 
 - 已建立 `src/domain/worldCycles/`，包含 engine、schedule、status、normalize 與型別。
-- 已將 `public/data/world_cycles.json` 升級為 v2 schema。
+- 已將 `src/data/world_cycles.json` 升級為 v2 schema。
 - 已加入 Duviri 五段 Mood Spiral：`joy`、`anger`、`envy`、`sorrow`、`fear`。
 - 已將循環狀態圖片整理到 `public/images/states/{world}/`。
 - 已讓 Card / Modal 讀取通用 `states[]`，Modal 改成日期分組 timeline。

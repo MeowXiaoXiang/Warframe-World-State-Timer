@@ -372,8 +372,18 @@ function formatRemaining(milliseconds: number): string {
 	return `${hours}h ${minutes}m ${seconds}s`;
 }
 
-const dataPath = resolve("public/data/world_cycles.json");
-const data = JSON.parse(await readFile(dataPath, "utf-8")) as RawWorldCyclesData;
+const dataPath = resolve("src/data/world_cycles.json");
+const publicDataPath = resolve("public/data/world_cycles.json");
+const dataText = await readFile(dataPath, "utf-8");
+const publicDataText = await readFile(publicDataPath, "utf-8");
+
+if (dataText !== publicDataText) {
+	throw new Error(
+		`public/data/world_cycles.json must match src/data/world_cycles.json. Update both files together.`
+	);
+}
+
+const data = JSON.parse(dataText) as RawWorldCyclesData;
 
 if (data.version !== 2) {
 	throw new Error(`Expected world_cycles.json version 2, got ${data.version}.`);
@@ -383,6 +393,7 @@ const worldIds = Object.keys(data.worlds);
 const nowMs = Date.now();
 
 console.log(`Verifying ${worldIds.length} world cycles from ${dataPath}`);
+console.log(`Compatibility copy matches ${publicDataPath}`);
 
 const worlds = worldIds.map((worldId) => normalizeForVerification(worldId, data));
 

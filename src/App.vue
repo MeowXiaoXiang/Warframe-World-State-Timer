@@ -33,6 +33,7 @@ import FloatingButtons from "./components/FloatingButtons.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
+import worldCyclesData from "./data/world_cycles.json";
 import { calculateWorldStatus, normalizeWorldCycle } from "./domain/worldCycles";
 import type { ModalExpose, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./domain/worldCycles";
 
@@ -43,7 +44,7 @@ const { locale, t } = useI18n(); // 使用 vue-i18n
 // 全局狀態
 const loadingVisible = ref(true);
 const worlds = ref<WorldCycle[]>([]); // 保存處理後的世界資料
-const rawWorldData = ref<RawWorldCyclesData | null>(null); // 保存原始的 world_cycles.json 資料
+const rawWorldData = worldCyclesData as RawWorldCyclesData; // 編譯進 bundle 的原始 world_cycles.json 資料
 const worldStatus = ref<WorldStatusMap>({}); // 動態狀態資料
 const currentTime = ref("");
 const currentTimezone = ref("");
@@ -62,20 +63,15 @@ let updateTimerId: ReturnType<typeof setInterval> | null = null;
 const modalComponent = ref<ModalExpose | null>(null);
 const selectedWorld = ref<WorldCycle | null>(null);
 
-const transformWorldData = (currentLocale: string): WorldCycle[] => {
-	console.debug(`Transforming world data to ${currentLocale}`);
-	if (!rawWorldData.value) return [];
-
-	return Object.entries(rawWorldData.value.worlds).map(([id, world]) =>
+const transformWorldData = (): WorldCycle[] => {
+	return Object.entries(rawWorldData.worlds).map(([id, world]) =>
 		normalizeWorldCycle(id, world, { t })
 	);
 };
 
-// 從 JSON 獲取世界資料（僅讀取一次）
-const fetchWorldsData = async () => {
-	const response = await fetch("./data/world_cycles.json");
-	rawWorldData.value = await response.json(); // 存原始資料
-	worlds.value = transformWorldData(String(locale.value)); // 初始化為當前語言
+// 初始化編譯進 bundle 的世界資料
+const loadWorldsData = () => {
+	worlds.value = transformWorldData(); // 初始化為當前語言
 };
 
 // 更新當前時間和時區
@@ -162,7 +158,7 @@ watch(
 // 監控語言變化，切換語言（修改為僅更新處理後的資料）
 watch(locale, () => {
 	console.debug(`Language switched to: ${locale.value}`);
-	worlds.value = transformWorldData(String(locale.value)); // 僅更新語言變化
+	worlds.value = transformWorldData(); // 僅更新語言變化
 	worldStatus.value = calculateWorldStatus(worlds.value, { t }); // 立即同步狀態，避免切換語言瞬間不一致
 	updateDocumentTitle();
 	updateDocumentLanguage();
@@ -179,11 +175,11 @@ watch(locale, () => {
 });
 
 // 初始化
-onMounted(async () => {
+onMounted(() => {
 	updateDocumentTitle();
 	updateDocumentLanguage();
 	updateManifestLink();
-	await fetchWorldsData();
+	loadWorldsData();
 	worldStatus.value = calculateWorldStatus(worlds.value, { t });
 	updateTimeAndTimezone();
 	updateTimerId = setInterval(() => {

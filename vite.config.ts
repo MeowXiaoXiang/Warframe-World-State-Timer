@@ -12,16 +12,6 @@ export default defineConfig({
 			manifest: false,
 			workbox: {
 				globPatterns: ["**/*.{js,css,html,ico,png,svg,json,webmanifest}"],
-				runtimeCaching: [
-					{
-						urlPattern: ({ url }) =>
-							url.pathname.endsWith("/data/world_cycles.json"),
-						handler: "StaleWhileRevalidate",
-						options: {
-							cacheName: "world-cycles-data",
-						},
-					},
-				],
 			},
 		}),
 	],

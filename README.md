@@ -50,7 +50,13 @@
 
 補充：[Warframe Worldstate Parser (WFCD)](https://github.com/WFCD/warframe-worldstate-parser) 與 [Warframe 官方動態世界狀態 API](https://content.warframe.com/dynamic/worldState.php) 可作為理解 world state 的背景參考，但目前世界循環時間表不即時解析它們，而是以本地 v2 cycle data 為準。
 
-### `world_cycles.json` 範例 (/public/data/world_cycles.json)
+### `world_cycles.json`
+
+主要資料來源位於 `src/data/world_cycles.json`，會在 build 時編譯進前端 bundle，讓 App 首屏與離線行為不依賴額外 fetch。
+
+為了保留既有 GitHub Pages 靜態 URL 的相容性，`public/data/world_cycles.json` 仍會隨部署輸出，但 App 本身不會從這個路徑載入資料。更新 cycle data 時，兩份檔案需要保持一致，`pnpm verify:cycles` 會檢查這件事。
+
+範例：
 
 ```json
 {
@@ -87,7 +93,7 @@
 - **states**: 任意長度的狀態陣列，依序循環。
 - **key**: 狀態 key，對應 `src/locales/*.json` 的顯示文字。
 - **durationMs**: 該狀態持續時間，單位為毫秒。
-- **icon**: emoji 或 `public/` 下的圖片路徑。
+- **icon**: emoji 或 `public/` 下的圖片路徑。此資料會在 build 時編譯進前端 bundle。
 - **theme.light / theme.dark**: 狀態在淺色與深色模式下的識別色，包含 `accent`、`surface`、`text`。
 - 世界名稱與狀態翻譯存放於 `src/locales/zh-TW.json` 與 `src/locales/en.json`。
 
@@ -124,7 +130,7 @@ pnpm type-check
 pnpm verify:cycles
 ```
 
-`verify:cycles` 會驗證現有世界循環資料、渡域五段循環順序、未來時間表推演與基本效能。
+`verify:cycles` 會驗證現有世界循環資料、確認 public 相容副本與編譯來源一致、渡域五段循環順序、未來時間表推演與基本效能。
 
 ### 構建網站
 
@@ -138,7 +144,8 @@ pnpm build
 
 - 已整合 Web App Manifest 與 Service Worker。
 - 部署後可在支援的瀏覽器中「安裝」到桌面或主畫面。
-- `world_cycles.json` 會透過 `StaleWhileRevalidate` 策略快取，提升重開速度與離線可用性。
+- `world_cycles.json` 會編譯進前端 bundle，跟隨同一個 build 版本被 Service Worker 快取，降低額外 fetch 失敗風險。
+- `public/data/world_cycles.json` 保留為 legacy 靜態檔相容用途，不作為 App runtime 載入來源。
 
 ## 版本更新
 

@@ -1,0 +1,251 @@
+{
+    "version": 2,
+    "worlds": {
+        "plains_earth": {
+            "epochMs": 1766129867176,
+            "states": [
+                {
+                    "key": "day",
+                    "durationMs": 5998874,
+                    "icon": "☀️",
+                    "theme": {
+                        "light": {
+                            "accent": "#f6a623",
+                            "surface": "#ffe2a6",
+                            "text": "#5f3b00"
+                        },
+                        "dark": {
+                            "accent": "#ffbf47",
+                            "surface": "#4a320d",
+                            "text": "#ffe8a3"
+                        }
+                    }
+                },
+                {
+                    "key": "night",
+                    "durationMs": 3000000,
+                    "icon": "🌙",
+                    "theme": {
+                        "light": {
+                            "accent": "#6674e8",
+                            "surface": "#dde3ff",
+                            "text": "#243187"
+                        },
+                        "dark": {
+                            "accent": "#93a2ff",
+                            "surface": "#202a62",
+                            "text": "#eef1ff"
+                        }
+                    }
+                }
+            ]
+        },
+        "orb": {
+            "epochMs": 1766128805676,
+            "states": [
+                {
+                    "key": "warm",
+                    "durationMs": 400000,
+                    "icon": "🔥",
+                    "theme": {
+                        "light": {
+                            "accent": "#f0782e",
+                            "surface": "#ffe0c2",
+                            "text": "#763100"
+                        },
+                        "dark": {
+                            "accent": "#ff8b52",
+                            "surface": "#432313",
+                            "text": "#ffe0cf"
+                        }
+                    }
+                },
+                {
+                    "key": "cold",
+                    "durationMs": 1200000,
+                    "icon": "❄️",
+                    "theme": {
+                        "light": {
+                            "accent": "#2f9feb",
+                            "surface": "#d8f0ff",
+                            "text": "#064e78"
+                        },
+                        "dark": {
+                            "accent": "#69c8ff",
+                            "surface": "#15384f",
+                            "text": "#e4f6ff"
+                        }
+                    }
+                }
+            ]
+        },
+        "cambion": {
+            "epochMs": 1766129867176,
+            "states": [
+                {
+                    "key": "fass",
+                    "durationMs": 5998874,
+                    "icon": "./images/states/cambion/fass.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#b96b38",
+                            "surface": "#ffe0c8",
+                            "text": "#642d0e"
+                        },
+                        "dark": {
+                            "accent": "#e09158",
+                            "surface": "#3b2518",
+                            "text": "#ffe7d4"
+                        }
+                    }
+                },
+                {
+                    "key": "vome",
+                    "durationMs": 3000000,
+                    "icon": "./images/states/cambion/vome.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#3e85a7",
+                            "surface": "#d8ecf6",
+                            "text": "#174c65"
+                        },
+                        "dark": {
+                            "accent": "#6fb6da",
+                            "surface": "#173243",
+                            "text": "#e1f7ff"
+                        }
+                    }
+                }
+            ]
+        },
+        "zariman": {
+            "epochMs": 1738845270000,
+            "states": [
+                {
+                    "key": "grineer",
+                    "durationMs": 9000000,
+                    "icon": "./images/states/zariman/grineer.svg",
+                    "theme": {
+                        "light": {
+                            "accent": "#c04c2f",
+                            "surface": "#ffd7c9",
+                            "text": "#6d1f10"
+                        },
+                        "dark": {
+                            "accent": "#e0653d",
+                            "surface": "#3b1a12",
+                            "text": "#ffe1d6"
+                        }
+                    }
+                },
+                {
+                    "key": "corpus",
+                    "durationMs": 9000000,
+                    "icon": "./images/states/zariman/corpus.svg",
+                    "theme": {
+                        "light": {
+                            "accent": "#1f7fd8",
+                            "surface": "#d8edff",
+                            "text": "#0b477d"
+                        },
+                        "dark": {
+                            "accent": "#63baff",
+                            "surface": "#142f4f",
+                            "text": "#e3f3ff"
+                        }
+                    }
+                }
+            ]
+        },
+        "duviri": {
+            "epochMs": 1766138452676,
+            "states": [
+                {
+                    "key": "joy",
+                    "durationMs": 7200000,
+                    "icon": "./images/states/duviri/joy.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#d7a93a",
+                            "surface": "#ffedb2",
+                            "text": "#674800"
+                        },
+                        "dark": {
+                            "accent": "#f0c65b",
+                            "surface": "#3b300f",
+                            "text": "#fff0b3"
+                        }
+                    }
+                },
+                {
+                    "key": "anger",
+                    "durationMs": 7200000,
+                    "icon": "./images/states/duviri/anger.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#d14a32",
+                            "surface": "#ffd5cb",
+                            "text": "#762015"
+                        },
+                        "dark": {
+                            "accent": "#ff735b",
+                            "surface": "#431b16",
+                            "text": "#ffd8d1"
+                        }
+                    }
+                },
+                {
+                    "key": "envy",
+                    "durationMs": 7200000,
+                    "icon": "./images/states/duviri/envy.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#6e8f33",
+                            "surface": "#edf4cf",
+                            "text": "#3f5512"
+                        },
+                        "dark": {
+                            "accent": "#a6bd5d",
+                            "surface": "#2b3517",
+                            "text": "#edf4cf"
+                        }
+                    }
+                },
+                {
+                    "key": "sorrow",
+                    "durationMs": 7200000,
+                    "icon": "./images/states/duviri/sorrow.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#5f7f91",
+                            "surface": "#e2edf2",
+                            "text": "#2f4c5b"
+                        },
+                        "dark": {
+                            "accent": "#8fb2c2",
+                            "surface": "#202f36",
+                            "text": "#e2edf2"
+                        }
+                    }
+                },
+                {
+                    "key": "fear",
+                    "durationMs": 7200000,
+                    "icon": "./images/states/duviri/fear.png",
+                    "theme": {
+                        "light": {
+                            "accent": "#2f7f9c",
+                            "surface": "#d9eff7",
+                            "text": "#164f64"
+                        },
+                        "dark": {
+                            "accent": "#61b2cf",
+                            "surface": "#143442",
+                            "text": "#d9eff7"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
