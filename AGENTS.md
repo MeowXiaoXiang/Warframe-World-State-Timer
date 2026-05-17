@@ -19,7 +19,9 @@ Warframe World State Timer is a Vue 3 + Vite + TypeScript app deployed to GitHub
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm test
 pnpm type-check
+pnpm verify:cycles
 pnpm build
 pnpm preview --host 127.0.0.1 --port 4173
 ```
@@ -33,8 +35,9 @@ http://127.0.0.1:4173/Warframe-World-State-Timer/
 ## TypeScript
 
 - Keep TypeScript strict.
-- Prefer shared domain types in `src/types/`.
+- Keep world-cycle domain types and logic in `src/domain/worldCycles/`.
 - Keep world-cycle data contracts explicit before changing cycle mechanisms.
+- Validate cycle changes with `pnpm test` and `pnpm verify:cycles`.
 - Run `pnpm type-check` before considering TypeScript work complete.
 
 ## Frontend Notes
@@ -49,7 +52,9 @@ Before committing, run:
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm test
 pnpm type-check
+pnpm verify:cycles
 pnpm build
 pnpm outdated --format json
 git diff --check

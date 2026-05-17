@@ -1,35 +1,28 @@
 import { createApp } from "vue";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.vue";
-import "bootstrap/dist/css/bootstrap.min.css"; // Bootstrap CSS
-import "./style.css"; // 全域樣式
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./style.css";
 
-// Vue I18n
 import { createI18n } from "vue-i18n";
 import tw from "./locales/zh-TW.json";
 import en from "./locales/en.json";
 
-// Day.js plugins
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isBetween from "dayjs/plugin/isBetween";
 
-// 主題管理
 import { initTheme } from "./utils/themeManager";
 
-// 初始化 Day.js 插件
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isBetween);
 
-// 初始化主題
 initTheme();
 
-// 註冊 PWA Service Worker
 registerSW({ immediate: true });
 
-// Vue I18n
 const savedLocale = localStorage.getItem("locale") || "zh-TW";
 const i18n = createI18n({
     legacy: false,
@@ -41,8 +34,7 @@ const i18n = createI18n({
     },
 });
 
-// 創建 Vue 應用
 const app = createApp(App);
 
-app.use(i18n); // 使用 I18n
+app.use(i18n);
 app.mount("#app");

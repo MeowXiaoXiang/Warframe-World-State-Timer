@@ -2,8 +2,7 @@
     <footer ref="footerElement" class="footer text-center py-2" :class="{ 'bg-dark text-light': isDarkTheme, 'bg-light text-dark': !isDarkTheme }">
         <div class="container">
             <p class="footer-line">
-                © 2026
-                <!-- 個人 Github 頁面連結 -->
+                © 2025-2026
                 <a
                     href="https://github.com/MeowXiaoXiang"
                     target="_blank"
@@ -13,7 +12,6 @@
                 >
                     Michael Lan (MeowXiaoXiang)
                 </a>
-                <!-- MIT License 按鈕 -->
                 <a
                     href="https://github.com/MeowXiaoXiang/Warframe-World-State-Timer/blob/main/LICENSE"
                     target="_blank"
@@ -23,7 +21,6 @@
                 >
                     MIT License
                 </a>
-                <!-- GitHub 按鈕 -->
                 <a
                     href="https://github.com/MeowXiaoXiang/Warframe-World-State-Timer"
                     target="_blank"
@@ -89,7 +86,6 @@ footer.footer {
     margin-bottom: 0.25rem;
 }
 
-/* 名字按鈕樣式 */
 .name-btn {
     display: inline-block;
     padding: 2px 6px;
@@ -99,7 +95,6 @@ footer.footer {
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
-/* 深色模式 */
 .name-btn-dark {
     background-color: inherit;
     color: white;
@@ -109,7 +104,6 @@ footer.footer {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 淺色模式 */
 .name-btn-light {
     background-color: inherit;
     color: black;
@@ -119,7 +113,6 @@ footer.footer {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* MIT License 按鈕 */
 .mit-btn {
     display: inline-block;
     padding: 4px 8px;
@@ -131,7 +124,6 @@ footer.footer {
     margin-right: 2px;
 }
 
-/* 深色模式 */
 .mit-btn-dark {
     background-color: rgba(255, 255, 255, 0.05);
     color: white;
@@ -141,7 +133,6 @@ footer.footer {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 浅色模式 */
 .mit-btn-light {
     background-color: rgba(0, 0, 0, 0.05);
     color: black;

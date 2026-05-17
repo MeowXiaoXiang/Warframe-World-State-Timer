@@ -1,0 +1,454 @@
+# State Cycle Engine v2 設計與實作紀錄
+
+本文件記錄 v2 world cycle engine 的設計脈絡、資料模型與目前實作狀態。README 保留使用者導向說明；這裡保留重構決策、資料來源分級與後續維護時需要理解的背景。
+
+## 背景
+
+重構前，專案的世界循環資料與計算邏輯以 day/night 二狀態為核心：
+
+- `startTime`
+- `loopTime`
+- `dayTime`
+- `nightTime`
+- `dayStatusName`
+- `nightStatusName`
+- `dayIcon`
+- `nightIcon`
+
+這對 Plains of Eidolon、Orb Vallis、Cambion Drift 這類二狀態循環足夠，但不適合 Duviri 這種五狀態循環，也不利於未來新增其他多狀態世界循環。
+
+v2 的目標不是替 day/night 補特例，而是把核心模型改成任意狀態數的 cycle engine。
+
+## 設計核心
+
+每個世界都是一個由 `epochMs` 錨定、由 `states[]` 組成的循環。
+
+```text
+WorldCycle = epochMs + states[]
+WorldState = key + durationMs + icon + theme
+```
+
+計算時只需要：
+
+```text
+nowMs = Date.now()
+elapsedMs = nowMs - epochMs
+positionMs = positiveModulo(elapsedMs, loopDurationMs)
+currentState = findStateByPosition(positionMs)
+nextState = states[(currentIndex + 1) % states.length]
+```
+
+`loopDurationMs` 由 `states[].durationMs` 加總取得，不再手寫。
+
+## 資料格式
+
+`public/data/world_cycles.json` 已升級為 v2 schema。下方是節錄範例；正式資料中每個 state 都需要包含 `theme.light` 與 `theme.dark`。
+
+```json
+{
+  "version": 2,
+  "worlds": {
+    "plains_earth": {
+      "epochMs": 1766129867176,
+      "states": [
+        {
+          "key": "day",
+          "durationMs": 5998874,
+          "icon": "☀️",
+          "theme": {
+            "light": { "accent": "#f6a623", "surface": "#ffe2a6", "text": "#5f3b00" },
+            "dark": { "accent": "#ffbf47", "surface": "#4a320d", "text": "#ffe8a3" }
+          }
+        },
+        {
+          "key": "night",
+          "durationMs": 3000000,
+          "icon": "🌙",
+          "theme": {
+            "light": { "accent": "#6674e8", "surface": "#dde3ff", "text": "#243187" },
+            "dark": { "accent": "#93a2ff", "surface": "#202a62", "text": "#eef1ff" }
+          }
+        }
+      ]
+    },
+    "orb": {
+      "epochMs": 1766128805676,
+      "states": [
+        {
+          "key": "warm",
+          "durationMs": 400000,
+          "icon": "🔥",
+          "theme": {
+            "light": { "accent": "#f0782e", "surface": "#ffe0c2", "text": "#763100" },
+            "dark": { "accent": "#ff8b52", "surface": "#432313", "text": "#ffe0cf" }
+          }
+        },
+        {
+          "key": "cold",
+          "durationMs": 1200000,
+          "icon": "❄️",
+          "theme": {
+            "light": { "accent": "#2f9feb", "surface": "#d8f0ff", "text": "#064e78" },
+            "dark": { "accent": "#69c8ff", "surface": "#15384f", "text": "#e4f6ff" }
+          }
+        }
+      ]
+    },
+    "duviri": {
+      "epochMs": 1766138452676,
+      "states": [
+        {
+          "key": "joy",
+          "durationMs": 7200000,
+          "icon": "./images/states/duviri/joy.png",
+          "theme": {
+            "light": { "accent": "#d7a93a", "surface": "#ffedb2", "text": "#674800" },
+            "dark": { "accent": "#f0c65b", "surface": "#3b300f", "text": "#fff0b3" }
+          }
+        },
+        {
+          "key": "anger",
+          "durationMs": 7200000,
+          "icon": "./images/states/duviri/anger.png",
+          "theme": {
+            "light": { "accent": "#d14a32", "surface": "#ffd5cb", "text": "#762015" },
+            "dark": { "accent": "#ff735b", "surface": "#431b16", "text": "#ffd8d1" }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Duviri 正式資料包含完整五段 state；上方僅節錄前兩段，並保留每個 state 必要的 `theme` 欄位。
+
+### 不再作為新版核心的欄位
+
+以下欄位會從 v2 domain model 移除：
+
+- `startTime`
+- `loopTime`
+- `dayTime`
+- `nightTime`
+- `dayStatusName`
+- `nightStatusName`
+- `dayIcon`
+- `nightIcon`
+
+這些是舊二狀態模型的概念。v2 不做舊格式相容層，而是直接將現有資料轉成 `epochMs + states[]`。
+
+## i18n 策略
+
+`world_cycles.json` 只放循環資料，不放翻譯文字。
+
+世界名稱與狀態名稱移到 `src/locales/*.json`：
+
+```json
+{
+  "worlds": {
+    "duviri": {
+      "name": "Duviri",
+      "states": {
+        "joy": "Joy",
+        "anger": "Anger",
+        "envy": "Envy",
+        "sorrow": "Sorrow",
+        "fear": "Fear"
+      }
+    }
+  }
+}
+```
+
+中文檔使用相同 key：
+
+```json
+{
+  "worlds": {
+    "duviri": {
+      "name": "渡域",
+      "states": {
+        "joy": "喜悅",
+        "anger": "憤怒",
+        "envy": "嫉妒",
+        "sorrow": "悲傷",
+        "fear": "恐懼"
+      }
+    }
+  }
+}
+```
+
+## 圖示策略
+
+目前不建立 icon registry。
+
+`icon` 保留為 string，支援：
+
+- emoji 或純文字
+- public image path
+- SVG
+- PNG
+- JPG/JPEG
+- GIF
+- WebP/AVIF 可在 UI 判斷中補上
+
+範例：
+
+```json
+{ "icon": "☀️" }
+{ "icon": "./images/states/duviri/joy.png" }
+```
+
+若未來需要統一圖示風格，再改成 `iconKey` 搭配 `iconRegistry.ts`。
+
+## 資料來源與限制
+
+本地參考資料來自 Warframe Wiki 的 raw template / gadget，保存在本機但不提交：
+
+- `wiki.warframe.com.rawcode`
+- `wiki.warframe.com.js`
+
+這些檔案已加入 `.git/info/exclude`，不放進 repo。
+
+### 來源分級
+
+主要資料來源：
+
+- [Template:CycleClock raw](https://wiki.warframe.com/index.php?title=Template%3ACycleClock&action=raw)
+  - 用於 Plains of Eidolon / Earth、Orb Vallis、Cambion Drift、Duviri 的 `epochMs`、狀態持續時間與 state messages。
+
+行為參考：
+
+- [MediaWiki:Gadget-CycleClock.js](https://wiki.warframe.com/w/MediaWiki:Gadget-CycleClock.js)
+  - 僅參考 Wiki 如何呈現 cycle clock。
+  - 不作為校準資料來源，不複製其 JS/CSS 實作。
+
+### CycleClock 類資料
+
+Wiki `CycleClock` 模型提供：
+
+- `epoch`
+- `stateDurations`
+- `stateMessages`
+
+可直接轉換成 v2：
+
+```text
+epoch -> epochMs
+stateDurations -> states[].durationMs
+stateMessages -> states[].key / locale label
+```
+
+目前 rawcode 已涵蓋：
+
+- Plains of Eidolon / Earth
+- Orb Vallis
+- Cambion Drift
+- Duviri
+
+Zariman 的 Corpus / Grineer 入侵方輪替已評估為低價值 timer：它主要影響任務內敵方陣營，不影響 Zariman bounty reward pool，且官方 raw world state 未直接暴露當前入侵方欄位。相關素材暫時保留在 `public/images/states/zariman/` 作為備用，但不納入目前的 `WorldCycle` 資料。
+
+Daily Reset、Weekly Reset、Baro、Ergo、Eleanor、Zariman bounty refresh 等 countdown 不納入這一輪 `WorldCycle` 重構，避免模型過度膨脹。
+
+## TypeScript 型別
+
+```ts
+export interface RawWorldCyclesData {
+  version: 2;
+  worlds: Record<string, RawWorldCycle>;
+}
+
+export interface RawWorldCycle {
+  epochMs: number;
+  states: RawWorldState[];
+}
+
+export interface RawWorldState {
+  key: string;
+  durationMs: number;
+  icon?: string;
+  theme: WorldStateTheme;
+}
+
+export interface WorldCycle {
+  id: string;
+  name: string;
+  epochMs: number;
+  loopDurationMs: number;
+  states: WorldState[];
+}
+
+export interface WorldState {
+  key: string;
+  label: string;
+  icon?: string;
+  durationMs: number;
+  theme: WorldStateTheme;
+}
+
+export interface WorldStateTheme {
+  light: WorldStatePalette;
+  dark: WorldStatePalette;
+}
+
+export interface WorldStatePalette {
+  accent: string;
+  surface: string;
+  text: string;
+}
+
+export interface ActiveWorldState {
+  worldId: string;
+  state: WorldState;
+  nextState: WorldState;
+  stateIndex: number;
+  nextStateIndex: number;
+  startedAtMs: number;
+  endsAtMs: number;
+  elapsedMs: number;
+  remainingMs: number;
+  positionMs: number;
+  loopDurationMs: number;
+}
+
+export interface CycleEntry {
+  worldId: string;
+  stateKey: string;
+  stateIndex: number;
+  label: string;
+  icon?: string;
+  theme: WorldStateTheme;
+  start: Dayjs;
+  end: Dayjs;
+  startMs: number;
+  endMs: number;
+  statusClass?: CycleStatusClass;
+}
+```
+
+## UI 方向
+
+### Card
+
+Card 改成顯示 current state 與剩餘時間：
+
+```text
+World name - Current state
+Current state ends in timeLeft
+icon
+```
+
+不再知道 day/night。
+
+### Modal
+
+Modal 從 day/night 雙欄改為通用 timeline。
+
+目前採用：
+
+```text
+Today
+08:00 - 10:00  Joy      ongoing
+10:00 - 12:00  Anger    next
+12:00 - 14:00  Envy
+
+Tomorrow
+...
+```
+
+桌面與手機先共用垂直列表，穩定後再考慮更精緻的水平時間軸。
+
+## 分階段改寫紀錄
+
+### Phase 0: Branch 與文件
+
+- 建立 `refactor/state-cycle-engine-v2` 分支。
+- 將 wiki rawcode/js 加入 `.git/info/exclude`。
+- 新增本文件記錄 v2 設計。
+- 此階段不改 runtime 行為。
+
+### Phase 1: v2 型別與資料
+
+- 新增 `src/domain/worldCycles/types.ts`。
+- 將 `public/data/world_cycles.json` 改成 v2 schema。
+- 將世界名稱與 state label 移到 `src/locales/zh-TW.json`、`src/locales/en.json`。
+- 先讓 TypeScript 型別可以表達 v2 資料，再接 UI。
+
+### Phase 2: Cycle Engine
+
+- 新增或重構 cycle engine utility。
+- 實作：
+  - positive modulo
+  - `getActiveWorldState(world, nowMs)`
+  - `calculateWorldStatus(worlds, i18n, nowMs?)`
+  - `calculateCycleEntries(world, range)`
+  - `assignCycleStatuses(entries, nowMs?)`
+- 全部以毫秒計算，顯示時再格式化。
+
+### Phase 3: Timeline Modal
+
+- 移除 day/night grouping。
+- Modal 改成日期分組的 state timeline。
+- 保留 existing behavior：
+  - ongoing
+  - ended
+  - next
+  - not-started
+- 確認 Plains、Orb、Cambion 二狀態世界仍正常。
+
+### Phase 4: Duviri 正式加入
+
+- 加入 Duviri v2 data。
+- 加入 Duviri locale labels。
+- 放入已整理好的 Duviri 圖示資源。
+- 驗證五狀態 schedule 與 current/next state。
+
+### Phase 5: 驗證與收斂
+
+- 執行：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm test
+pnpm type-check
+pnpm verify:cycles
+pnpm build
+git diff --check
+```
+
+## 目前實作狀態
+
+- 已建立 `src/domain/worldCycles/`，包含 engine、schedule、status、normalize 與型別。
+- 已將 `public/data/world_cycles.json` 升級為 v2 schema。
+- 已加入 Duviri 五段 Mood Spiral：`joy`、`anger`、`envy`、`sorrow`、`fear`。
+- 已將循環狀態圖片整理到 `public/images/states/{world}/`。
+- 已讓 Card / Modal 讀取通用 `states[]`，Modal 改成日期分組 timeline。
+- 已新增 Vitest 測試與 `pnpm verify:cycles` 驗證腳本。
+
+- production preview 檢查：
+
+```bash
+pnpm preview --host 127.0.0.1 --port 4173
+```
+
+- 驗證路徑：
+
+```text
+http://127.0.0.1:4173/Warframe-World-State-Timer/
+```
+
+## 暫不處理
+
+- PWA manifest 僅維護安裝 metadata 與 screenshots，不重新設計 PWA 架構。
+- 不刪除舊版純靜態站；已移至 `archive/legacy-static-site` 作為歷史封存。
+- 不把 Wiki rawcode/js 提交到 repo。
+- 不把 Daily/Weekly Reset、Baro、Ergo、Eleanor 納入 `WorldCycle`。
+- 不先做 icon registry。
+
+## 判斷原則
+
+這次重構不是新增 Duviri 特例，而是建立任意狀態數的世界循環引擎。
+
+Duviri 是壓力測試案例，不是架構特例。

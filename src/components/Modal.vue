@@ -2,39 +2,61 @@
     <div class="modal fade" tabindex="-1" role="dialog" ref="modal" :aria-hidden="!isVisible">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <!-- 標題 -->
                 <div class="modal-header" :class="isDarkTheme ? 'bg-dark text-light' : 'bg-light text-dark'">
                     <h5 class="modal-title">
                         {{ t("modal.title") }} - <span>{{ localWorld?.name }}</span>
                     </h5>
                     <button type="button" class="btn-close" :class="{ 'btn-close-white': isDarkTheme }" aria-label="Close" @click="closeModal"></button>
                 </div>
-                <!-- 圖例 -->
                 <div class="modal-legend" :class="isDarkTheme ? 'bg-dark text-light' : 'bg-light text-dark'">
                     <span class="legend-item status-not-started">{{ t("modal.legend.notStarted") }}</span>
                     <span class="legend-item status-next">{{ t("modal.legend.next") }}</span>
                     <span class="legend-item status-ongoing">{{ t("modal.legend.ongoing") }}</span>
                     <span class="legend-item status-ended">{{ t("modal.legend.ended") }}</span>
                 </div>
-                <!-- 子標題 -->
-                <div class="modal-subheader">
-                    <div class="modal-subtitle day-title">{{ localWorld?.dayStatusName }}</div>
-                    <div class="modal-subtitle night-title">{{ localWorld?.nightStatusName }}</div>
+                <div class="modal-state-strip">
+                    <span
+                        v-for="state in localWorld?.states"
+                        :key="state.key"
+                        class="state-chip"
+                        :style="getStateStyle(state.theme)"
+                    >
+                        <img
+                            v-if="state.icon && isImage(state.icon)"
+                            :src="state.icon"
+                            alt=""
+                            aria-hidden="true"
+                            class="state-chip-image"
+                            :class="{ 'svg-icon': isSvg(state.icon) }"
+                        />
+                        <span v-else-if="state.icon" class="state-chip-icon" aria-hidden="true">{{ state.icon }}</span>
+                        {{ state.label }}
+                    </span>
                 </div>
-                <!-- 滾動內容 -->
                 <div class="modal-body" :class="isDarkTheme ? 'text-light' : 'text-dark'">
-                    <template v-for="(group, date) in localGroupedCycles" :key="date">
+                    <template v-for="(cycles, date) in localGroupedCycles" :key="date">
                         <div class="schedule-date">{{ date }}</div>
-                        <div class="day-night-row">
-                            <div class="day-container">
-                                <div v-for="cycle in group.day" :key="cycle.start.format('HH:mm')" class="cycle-item"
-                                    :class="cycle.statusClass">
-                                    {{ cycle.start.format("HH:mm") }} ~ {{ cycle.end.format("HH:mm") }}
+                        <div class="timeline-list">
+                            <div
+                                v-for="cycle in cycles"
+                                :key="`${cycle.stateKey}-${cycle.startMs}`"
+                                class="cycle-item"
+                                :class="cycle.statusClass"
+                                :style="getStateStyle(cycle.theme)"
+                            >
+                                <div class="cycle-state">
+                                    <img
+                                        v-if="cycle.icon && isImage(cycle.icon)"
+                                        :src="cycle.icon"
+                                        alt=""
+                                        aria-hidden="true"
+                                        class="cycle-image"
+                                        :class="{ 'svg-icon': isSvg(cycle.icon) }"
+                                    />
+                                    <span v-else-if="cycle.icon" class="cycle-icon" aria-hidden="true">{{ cycle.icon }}</span>
+                                    <span>{{ cycle.label }}</span>
                                 </div>
-                            </div>
-                            <div class="night-container">
-                                <div v-for="cycle in group.night" :key="cycle.start.format('HH:mm')" class="cycle-item"
-                                    :class="cycle.statusClass">
+                                <div class="cycle-time">
                                     {{ cycle.start.format("HH:mm") }} ~ {{ cycle.end.format("HH:mm") }}
                                 </div>
                             </div>
@@ -50,23 +72,49 @@
 import { ref, onMounted } from "vue";
 import { Modal as BootstrapModal } from "bootstrap";
 import { useI18n } from "vue-i18n";
-import { calculateCycles, filterCycles, assignCycleStatuses } from "../utils/scheduleCalculator";
+import {
+    assignCycleStatuses,
+    calculateCycleEntries,
+    filterEntriesForTodayAndTomorrow,
+    getDefaultScheduleRange,
+} from "../domain/worldCycles";
 import { isDarkTheme } from "../utils/themeManager";
-import type { GroupedCycles, WorldCycle } from "../types/world";
+import type {
+    GroupedCycleEntries,
+    WorldCycle,
+    WorldStatePalette,
+    WorldStateTheme,
+} from "../domain/worldCycles";
 
 const { t } = useI18n();
 
-// Props
+const isImage = (icon: string): boolean => {
+    return /\.(svg|png|jpe?g|gif|webp|avif)$/i.test(icon);
+};
+
+const isSvg = (icon: string): boolean => {
+    return /\.svg$/i.test(icon);
+};
+
+const getStateStyle = (theme: WorldStateTheme): Record<string, string> => {
+    const palette: WorldStatePalette = theme[isDarkTheme.value ? "dark" : "light"];
+
+    return {
+        "--state-accent": palette.accent,
+        "--state-surface": palette.surface,
+        "--state-text": palette.text,
+    };
+};
+
 defineProps<{
     world?: WorldCycle | null;
 }>();
 
-// Ref & Variables
 const modal = ref<HTMLElement | null>(null);
-const isVisible = ref(false); // 是否顯示互動視窗
+const isVisible = ref(false);
 let bootstrapModal: BootstrapModal | null = null;
 const localWorld = ref<WorldCycle | null>(null);
-const localGroupedCycles = ref<GroupedCycles>({});
+const localGroupedCycles = ref<GroupedCycleEntries>({});
 const emit = defineEmits<{
     "modal-closed": [];
 }>();
@@ -78,12 +126,10 @@ onMounted(() => {
             keyboard: true,
         });
 
-        // 當模態框完全關閉時觸發清除
         modal.value.addEventListener("hidden.bs.modal", () => {
-            console.debug("Modal completely closed, clearing local data...");
             isVisible.value = false;
             clearLocalData();
-            emit("modal-closed"); // 通知父組件
+            emit("modal-closed");
         });
     }
 });
@@ -91,30 +137,23 @@ onMounted(() => {
 const clearLocalData = () => {
     localWorld.value = null;
     localGroupedCycles.value = {};
-    console.debug("Local data cleared in Modal.vue.");
 };
 
-// 更新分組數據
 const updateGroupedCycles = (world: WorldCycle) => {
     if (!world) return;
-    const rawCycles = calculateCycles(world);
-    const filteredCycles = filterCycles(rawCycles);
+    const rawCycles = calculateCycleEntries(world, getDefaultScheduleRange());
+    const filteredCycles = filterEntriesForTodayAndTomorrow(rawCycles);
     const assignedCycles = assignCycleStatuses(filteredCycles);
 
-    const grouped: GroupedCycles = {};
+    const grouped: GroupedCycleEntries = {};
     assignedCycles.forEach((cycle) => {
         const date = cycle.start.format("YYYY/MM/DD");
-        if (!grouped[date]) grouped[date] = { day: [], night: [] };
-        if (cycle.status === world.dayStatusName) {
-            grouped[date].day.push(cycle);
-        } else {
-            grouped[date].night.push(cycle);
-        }
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(cycle);
     });
     localGroupedCycles.value = grouped;
 };
 
-// 開啟互動視窗
 const openModal = (data: { world?: WorldCycle } | null) => {
     if (!bootstrapModal) {
         console.warn("Bootstrap modal is not initialized.");
@@ -127,7 +166,6 @@ const openModal = (data: { world?: WorldCycle } | null) => {
     }
 
     isVisible.value = true;
-    // 更新資料僅當目標世界不同時
     if (!localWorld.value || localWorld.value.id !== data.world.id) {
         setWorldAndCycles(data.world);
     }
@@ -135,32 +173,26 @@ const openModal = (data: { world?: WorldCycle } | null) => {
     bootstrapModal.show();
 };
 
-// 更新互動視窗數據
 const setWorldAndCycles = (world: WorldCycle) => {
     localWorld.value = world;
     updateGroupedCycles(world);
 };
 
-// 更新當前已開啟的互動視窗資料
 const updateData = (world: WorldCycle) => {
     if (!bootstrapModal) {
         console.warn("updateData called when modal is not initialized.");
         return;
     }
 
-    console.debug("Updating modal data...");
     setWorldAndCycles(world);
 };
 
-
-// 關閉互動視窗
 const closeModal = () => {
     if (!bootstrapModal) return;
-    isVisible.value = false; // 設定不可見狀態
-    bootstrapModal.hide(); // 只調用 Bootstrap 的隱藏方法
+    isVisible.value = false;
+    bootstrapModal.hide();
 };
 
-// 暴露方法
 defineExpose({
     openModal,
     closeModal,
@@ -183,7 +215,7 @@ defineExpose({
 }
 
 .modal-dialog.modal-lg {
-    max-width: min(700px, calc(100vw - 1.5rem));
+    max-width: min(580px, calc(100vw - 1.5rem));
     margin: 0.75rem auto;
 }
 
@@ -191,33 +223,52 @@ defineExpose({
     opacity: 0.5;
 }
 
-/* === 互動視窗子標題樣式 === */
-.modal-subheader {
+.modal-state-strip {
     display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
     background-color: #f8f9fa;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     font-weight: bold;
 }
 
-[data-theme="dark"] .modal-subheader {
+[data-theme="dark"] .modal-state-strip {
     background-color: #323842;
     border-bottom-color: rgba(255, 255, 255, 0.1);
     color: #d9e0eb;
 }
 
-.modal-subtitle {
-    font-size: 1.2rem;
-    text-align: center;
-    color: #4a4a4a;
+.state-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background-color: var(--state-surface);
+    color: var(--state-text);
+    border: 1px solid color-mix(in srgb, var(--state-accent) 38%, transparent);
+    font-size: 0.9rem;
 }
 
-[data-theme="dark"] .modal-subtitle {
-    color: #d4dbe7;
+.state-chip-icon {
+    line-height: 1;
 }
 
-/* === 互動視窗滾動內容 === */
+.state-chip-image {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+[data-theme="dark"] .state-chip {
+    background-color: var(--state-surface);
+    color: var(--state-text);
+    border-color: color-mix(in srgb, var(--state-accent) 52%, transparent);
+}
+
 .modal-body {
     max-height: calc(100dvh - 220px);
     overflow-y: auto;
@@ -235,7 +286,6 @@ defineExpose({
     color: #dfe6f1;
 }
 
-/* === 日期標題樣式 === */
 .schedule-date {
     font-size: 1.4rem;
     font-weight: bold;
@@ -255,75 +305,73 @@ defineExpose({
     border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
-/* === 白天與夜晚容器樣式 === */
-.day-night-row {
+.timeline-list {
     display: flex;
-    justify-content: space-between;
-    gap: 15px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
     margin-bottom: 14px;
 }
 
-.day-container,
-.night-container {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-/* 白天容器樣式 - 淺色模式 */
-.day-container {
-    background-color: #fff4e0;
-    /* 柔和奶油色，更明亮的日間感覺 */
-}
-
-/* 夜晚容器樣式 - 淺色模式 */
-.night-container {
-    background-color: #e2eafc;
-    /* 淡淡的天空藍，帶有一絲夜晚感 */
-}
-
-/* 白天容器樣式 - 深色模式 */
-[data-theme="dark"] .day-container {
-    background-color: #332f22;
-    border: 1px solid rgba(255, 221, 153, 0.18);
-}
-
-[data-theme="dark"] .night-container {
-    background-color: #1f2940;
-    border: 1px solid rgba(153, 194, 255, 0.2);
-}
-
-/* === 卡片樣式 === */
 .cycle-item {
-    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    padding: 8px 12px;
     border-radius: 8px;
     background-color: white;
     border: 1px solid #ddd;
-    font-size: 1.1rem;
+    border-left: 6px solid var(--state-accent);
+    font-size: 1.04rem;
     color: #333;
     width: 100%;
-    max-width: 200px;
-    text-align: center;
-    margin-bottom: 5px;
+    text-align: left;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cycle-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cycle-icon {
+    line-height: 1;
+}
+
+.cycle-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.svg-icon {
+    filter: invert(0);
+    transition: filter 0.3s ease;
+}
+
+[data-theme="dark"] .svg-icon {
+    filter: invert(1);
+}
+
+.cycle-time {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 1.2;
 }
 
 [data-theme="dark"] .cycle-item {
     background-color: #3f4651;
     color: #dfe6f1;
     border-color: #636d7c;
+    border-left-color: var(--state-accent);
 }
 
-/* === 狀態樣式 === */
-
-/* === 淺色主題 === */
 .status-not-started {
     background-color: #c2bbbb !important;
     color: #302f2f !important;
@@ -344,7 +392,6 @@ defineExpose({
     color: #8a0037 !important;
 }
 
-/* === 深色主題 === */
 [data-theme="dark"] .status-not-started {
     background-color: #4a505a !important;
     color: #d0d7e2 !important;
@@ -365,7 +412,6 @@ defineExpose({
     color: #ffe0ee !important;
 }
 
-/* === 圖例區域樣式 === */
 .modal-legend {
     display: flex;
     justify-content: space-around;
@@ -394,8 +440,6 @@ defineExpose({
     background-color: #4a505a;
 }
 
-/* === 滾動條樣式 === */
-/* 淺色主題滾動條 */
 .modal-body::-webkit-scrollbar {
     width: 10px;
 }
@@ -415,7 +459,6 @@ defineExpose({
     background: #a8a8a8;
 }
 
-/* 深色主題滾動條 */
 [data-theme="dark"] .modal-body::-webkit-scrollbar-track {
     background: #262c34;
     border-radius: 6px;
@@ -430,8 +473,6 @@ defineExpose({
 [data-theme="dark"] .modal-body::-webkit-scrollbar-thumb:hover {
     background: #747f8f;
 }
-
-/* Firefox 滾動條樣式 */
 
 .modal-body {
     scrollbar-width: thin;
@@ -461,6 +502,12 @@ defineExpose({
     .modal-body {
         max-height: calc(100dvh - 230px);
         padding: 16px 14px 10px;
+    }
+
+    .cycle-item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
     }
 }
 </style>

@@ -29,5 +29,38 @@
   },
   "header": {
     "installApp": "安裝 App"
+  },
+  "worlds": {
+    "plains_earth": {
+      "name": "夜靈平野 & 地球",
+      "states": {
+        "day": "白晝",
+        "night": "夜晚"
+      }
+    },
+    "orb": {
+      "name": "奧布山谷",
+      "states": {
+        "warm": "溫暖",
+        "cold": "寒冷"
+      }
+    },
+    "cambion": {
+      "name": "魔裔禁地",
+      "states": {
+        "fass": "Fass",
+        "vome": "Vome"
+      }
+    },
+    "duviri": {
+      "name": "渡域",
+      "states": {
+        "joy": "喜悅",
+        "anger": "憤怒",
+        "envy": "嫉妒",
+        "sorrow": "悲傷",
+        "fear": "恐懼"
+      }
+    }
   }
 }
