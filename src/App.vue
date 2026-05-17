@@ -5,7 +5,7 @@
 			<HeaderBar :site-name="t('app.siteName')" :current-time="currentTime" :current-timezone="currentTimezone" />
 			<div id="card-container" class="container">
 				<CardComponent v-for="world in worlds" :key="world.id" :world="world"
-					:status="worldStatus[world.id]?.status" :next-cycle="worldStatus[world.id]?.nextCycle"
+					:status="worldStatus[world.id]?.status"
 					:time-left="worldStatus[world.id]?.timeLeft" :icon="worldStatus[world.id]?.icon"
 					:theme="worldStatus[world.id]?.theme"
 					@click="handleCardClick(world)" />
@@ -50,6 +50,10 @@ const timeZoneShortFormatter = new Intl.DateTimeFormat("en-US", {
 	timeZone: userTimeZone,
 	timeZoneName: "short",
 });
+const worldCyclesSchemaVersion = 2;
+const worldCyclesDataRevision = 3;
+const worldCyclesDataUrl =
+	`${import.meta.env.BASE_URL}data/world_cycles.json?v=${worldCyclesDataRevision}`;
 let updateTimerId: ReturnType<typeof setInterval> | null = null;
 
 const modalComponent = ref<ModalExpose | null>(null);
@@ -64,9 +68,60 @@ const transformWorldData = (): WorldCycle[] => {
 };
 
 const fetchWorldsData = async () => {
-	const response = await fetch(`${import.meta.env.BASE_URL}data/world_cycles.json`);
-	rawWorldData.value = await response.json();
+	const response = await fetch(worldCyclesDataUrl);
+	if (!response.ok) {
+		throw new Error(`Failed to load world cycle data: ${response.status}`);
+	}
+
+	const data = await response.json();
+	if (!isRawWorldCyclesData(data)) {
+		throw new Error("Loaded world cycle data is not v2 schema.");
+	}
+
+	rawWorldData.value = data;
 	worlds.value = transformWorldData();
+};
+
+const isThemePalette = (value: unknown) => {
+	if (!value || typeof value !== "object") return false;
+	const palette = value as Record<string, unknown>;
+
+	return (
+		typeof palette.accent === "string" &&
+		typeof palette.surface === "string" &&
+		typeof palette.text === "string"
+	);
+};
+
+const isRawWorldCyclesData = (value: unknown): value is RawWorldCyclesData => {
+	if (!value || typeof value !== "object") return false;
+	const data = value as Record<string, unknown>;
+	if (data.version !== worldCyclesSchemaVersion || !data.worlds || typeof data.worlds !== "object") {
+		return false;
+	}
+
+	return Object.values(data.worlds as Record<string, unknown>).every((world) => {
+		if (!world || typeof world !== "object") return false;
+		const rawWorld = world as Record<string, unknown>;
+		if (typeof rawWorld.epochMs !== "number" || !Array.isArray(rawWorld.states)) {
+			return false;
+		}
+
+		return rawWorld.states.every((state) => {
+			if (!state || typeof state !== "object") return false;
+			const rawState = state as Record<string, unknown>;
+			const theme = rawState.theme as Record<string, unknown> | undefined;
+
+			return (
+				typeof rawState.key === "string" &&
+				typeof rawState.durationMs === "number" &&
+				(!rawState.icon || typeof rawState.icon === "string") &&
+				!!theme &&
+				isThemePalette(theme.light) &&
+				isThemePalette(theme.dark)
+			);
+		});
+	});
 };
 
 const updateTimeAndTimezone = () => {
@@ -156,7 +211,11 @@ onMounted(async () => {
 	updateDocumentTitle();
 	updateDocumentLanguage();
 	updateManifestLink();
-	await fetchWorldsData();
+	try {
+		await fetchWorldsData();
+	} catch (error) {
+		console.error(error);
+	}
 	worldStatus.value = calculateWorldStatus(worlds.value, { t });
 	updateTimeAndTimezone();
 	updateTimerId = setInterval(() => {

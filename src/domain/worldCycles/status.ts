@@ -18,7 +18,6 @@ export function calculateWorldStatus(
 
 		worldStatus[world.id] = {
 			status: activeState.state.label,
-			nextCycle: activeState.nextState.label,
 			icon: activeState.state.icon ?? "❓",
 			theme: activeState.state.theme,
 			timeLeft: formatTimeLeft(activeState.remainingMs, i18n),

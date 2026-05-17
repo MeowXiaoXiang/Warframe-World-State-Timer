@@ -41,7 +41,6 @@ describe("calculateWorldStatus", () => {
 		const status = calculateWorldStatus([world], { t }, 2000).test_status;
 
 		expect(status.status).toBe("Alpha");
-		expect(status.nextCycle).toBe("Beta");
 		expect(status.icon).toBe("A");
 		expect(status.theme).toBe(testTheme);
 		expect(status.timeLeft).toBe("1 s");

@@ -24,11 +24,12 @@
                         <img
                             v-if="state.icon && isImage(state.icon)"
                             :src="state.icon"
-                            :alt="state.label"
+                            alt=""
+                            aria-hidden="true"
                             class="state-chip-image"
                             :class="{ 'svg-icon': isSvg(state.icon) }"
                         />
-                        <span v-else-if="state.icon" class="state-chip-icon">{{ state.icon }}</span>
+                        <span v-else-if="state.icon" class="state-chip-icon" aria-hidden="true">{{ state.icon }}</span>
                         {{ state.label }}
                     </span>
                 </div>
@@ -47,11 +48,12 @@
                                     <img
                                         v-if="cycle.icon && isImage(cycle.icon)"
                                         :src="cycle.icon"
-                                        :alt="cycle.label"
+                                        alt=""
+                                        aria-hidden="true"
                                         class="cycle-image"
                                         :class="{ 'svg-icon': isSvg(cycle.icon) }"
                                     />
-                                    <span v-else-if="cycle.icon" class="cycle-icon">{{ cycle.icon }}</span>
+                                    <span v-else-if="cycle.icon" class="cycle-icon" aria-hidden="true">{{ cycle.icon }}</span>
                                     <span>{{ cycle.label }}</span>
                                 </div>
                                 <div class="cycle-time">

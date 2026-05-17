@@ -87,15 +87,15 @@ export function assignCycleStatuses(
 		};
 	});
 
-	const nextCycle = withBaseStatuses.find(
+	const nextEntry = withBaseStatuses.find(
 		(entry) => entry.statusClass === "status-not-started"
 	);
 
-	if (!nextCycle) {
+	if (!nextEntry) {
 		return withBaseStatuses;
 	}
 
 	return withBaseStatuses.map((entry) =>
-		entry === nextCycle ? { ...entry, statusClass: "status-next" } : entry
+		entry === nextEntry ? { ...entry, statusClass: "status-next" } : entry
 	);
 }

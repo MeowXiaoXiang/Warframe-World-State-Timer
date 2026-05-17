@@ -15,7 +15,7 @@
 - `dayIcon`
 - `nightIcon`
 
-這對 Plains of Eidolon、Orb Vallis、Cambion Drift、Zariman 這類二狀態循環足夠，但不適合 Duviri 這種五狀態循環，也不利於未來新增其他多狀態世界循環。
+這對 Plains of Eidolon、Orb Vallis、Cambion Drift 這類二狀態循環足夠，但不適合 Duviri 這種五狀態循環，也不利於未來新增其他多狀態世界循環。
 
 v2 的目標不是替 day/night 補特例，而是把核心模型改成任意狀態數的 cycle engine。
 
@@ -74,23 +74,54 @@ nextState = states[(currentIndex + 1) % states.length]
     "orb": {
       "epochMs": 1766128805676,
       "states": [
-        { "key": "warm", "durationMs": 400000, "icon": "🔥" },
-        { "key": "cold", "durationMs": 1200000, "icon": "❄️" }
+        {
+          "key": "warm",
+          "durationMs": 400000,
+          "icon": "🔥",
+          "theme": {
+            "light": { "accent": "#f0782e", "surface": "#ffe0c2", "text": "#763100" },
+            "dark": { "accent": "#ff8b52", "surface": "#432313", "text": "#ffe0cf" }
+          }
+        },
+        {
+          "key": "cold",
+          "durationMs": 1200000,
+          "icon": "❄️",
+          "theme": {
+            "light": { "accent": "#2f9feb", "surface": "#d8f0ff", "text": "#064e78" },
+            "dark": { "accent": "#69c8ff", "surface": "#15384f", "text": "#e4f6ff" }
+          }
+        }
       ]
     },
     "duviri": {
       "epochMs": 1766138452676,
       "states": [
-        { "key": "joy", "durationMs": 7200000, "icon": "./images/states/duviri/joy.png" },
-        { "key": "anger", "durationMs": 7200000, "icon": "./images/states/duviri/anger.png" },
-        { "key": "envy", "durationMs": 7200000, "icon": "./images/states/duviri/envy.png" },
-        { "key": "sorrow", "durationMs": 7200000, "icon": "./images/states/duviri/sorrow.png" },
-        { "key": "fear", "durationMs": 7200000, "icon": "./images/states/duviri/fear.png" }
+        {
+          "key": "joy",
+          "durationMs": 7200000,
+          "icon": "./images/states/duviri/joy.png",
+          "theme": {
+            "light": { "accent": "#d7a93a", "surface": "#ffedb2", "text": "#674800" },
+            "dark": { "accent": "#f0c65b", "surface": "#3b300f", "text": "#fff0b3" }
+          }
+        },
+        {
+          "key": "anger",
+          "durationMs": 7200000,
+          "icon": "./images/states/duviri/anger.png",
+          "theme": {
+            "light": { "accent": "#d14a32", "surface": "#ffd5cb", "text": "#762015" },
+            "dark": { "accent": "#ff735b", "surface": "#431b16", "text": "#ffd8d1" }
+          }
+        }
       ]
     }
   }
 }
 ```
+
+Duviri 正式資料包含完整五段 state；上方僅節錄前兩段，並保留每個 state 必要的 `theme` 欄位。
 
 ### 不再作為新版核心的欄位
 
@@ -167,7 +198,6 @@ nextState = states[(currentIndex + 1) % states.length]
 
 ```json
 { "icon": "☀️" }
-{ "icon": "./images/states/zariman/grineer.svg" }
 { "icon": "./images/states/duviri/joy.png" }
 ```
 
@@ -188,9 +218,6 @@ nextState = states[(currentIndex + 1) % states.length]
 
 - [Template:CycleClock raw](https://wiki.warframe.com/index.php?title=Template%3ACycleClock&action=raw)
   - 用於 Plains of Eidolon / Earth、Orb Vallis、Cambion Drift、Duviri 的 `epochMs`、狀態持續時間與 state messages。
-- [Template:Mainpage Box Timers](https://wiki.warframe.com/w/Template:Mainpage_Box_Timers)
-  - 用於確認首頁公開 timer 清單。
-  - 用於 Zariman 這類 `Countdown` 型 timer 的 `date`、`looptime`、`delaytime`。
 
 行為參考：
 
@@ -221,31 +248,9 @@ stateMessages -> states[].key / locale label
 - Cambion Drift
 - Duviri
 
-### Countdown 類資料
+Zariman 的 Corpus / Grineer 入侵方輪替已評估為低價值 timer：它主要影響任務內敵方陣營，不影響 Zariman bounty reward pool，且官方 raw world state 未直接暴露當前入侵方欄位。相關素材暫時保留在 `public/images/states/zariman/` 作為備用，但不納入目前的 `WorldCycle` 資料。
 
-Zariman 不是 `CycleClock`，而是 Wiki `Countdown`：
-
-```text
-date = February 6, 2025 12:34:30 UTC
-looptime = 18000
-delaytime = 9000
-```
-
-可手動轉成二狀態 cycle：
-
-```json
-{
-  "epochMs": 1738845270000,
-  "states": [
-    { "key": "corpus", "durationMs": 9000000, "icon": "./images/states/zariman/corpus.svg" },
-    { "key": "grineer", "durationMs": 9000000, "icon": "./images/states/zariman/grineer.svg" }
-  ]
-}
-```
-
-官方 world state 目前可取得 `ZarimanSyndicate` 的 bounty activation / expiry，但未直接暴露 Grineer / Corpus 當前佔據狀態。本地資料以 2026-05-16 遊戲內觀察到的 Grineer 狀態校準，因此將 `date` 視為 Corpus 段起點。
-
-Daily Reset、Weekly Reset、Baro、Ergo、Eleanor 等 countdown 不納入這一輪 `WorldCycle` 重構，避免模型過度膨脹。
+Daily Reset、Weekly Reset、Baro、Ergo、Eleanor、Zariman bounty refresh 等 countdown 不納入這一輪 `WorldCycle` 重構，避免模型過度膨脹。
 
 ## TypeScript 型別
 
@@ -327,7 +332,7 @@ export interface CycleEntry {
 
 ### Card
 
-Card 改成顯示 current / next state：
+Card 改成顯示 current state 與剩餘時間：
 
 ```text
 World name - Current state
@@ -391,7 +396,7 @@ Tomorrow
   - ended
   - next
   - not-started
-- 確認 Plains、Orb、Cambion、Zariman 二狀態世界仍正常。
+- 確認 Plains、Orb、Cambion 二狀態世界仍正常。
 
 ### Phase 4: Duviri 正式加入
 
@@ -436,7 +441,7 @@ http://127.0.0.1:4173/Warframe-World-State-Timer/
 
 ## 暫不處理
 
-- 不重寫 PWA manifest。
+- PWA manifest 僅維護安裝 metadata 與 screenshots，不重新設計 PWA 架構。
 - 不刪除舊版純靜態站；已移至 `archive/legacy-static-site` 作為歷史封存。
 - 不把 Wiki rawcode/js 提交到 repo。
 - 不把 Daily/Weekly Reset、Baro、Ergo、Eleanor 納入 `WorldCycle`。

@@ -1,7 +1,7 @@
 {
   "name": "Warframe World Cycle Schedule",
   "short_name": "Warframe Timer",
-  "description": "Warframe World Cycle Schedule for Plains of Eidolon, Orb Vallis, Cambion Drift, Zariman, and Duviri.",
+  "description": "Warframe World Cycle Schedule for Plains of Eidolon, Orb Vallis, Cambion Drift, and Duviri.",
   "theme_color": "#333333",
   "background_color": "#121212",
   "display": "standalone",
@@ -17,6 +17,22 @@
       "src": "images/pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshots/wide-dashboard-en-US.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "World cycle dashboard on desktop"
+    },
+    {
+      "src": "images/screenshots/narrow-dashboard-en-US.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "World cycle dashboard on mobile"
     }
   ]
 }

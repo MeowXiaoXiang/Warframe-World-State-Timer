@@ -1,7 +1,7 @@
 {
   "name": "Warframe 世界循環時間表",
   "short_name": "Warframe 計時器",
-  "description": "Warframe 世界循環時間表，支援夜靈平野、奧布山谷、魔裔禁地、扎日曼號與渡域。",
+  "description": "Warframe 世界循環時間表，支援夜靈平野、奧布山谷、魔裔禁地與渡域。",
   "theme_color": "#333333",
   "background_color": "#121212",
   "display": "standalone",
@@ -17,6 +17,22 @@
       "src": "images/pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshots/wide-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "桌面版世界循環儀表板"
+    },
+    {
+      "src": "images/screenshots/narrow-dashboard.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "行動版世界循環儀表板"
     }
   ]
 }

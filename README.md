@@ -1,6 +1,6 @@
 # Warframe 世界循環時間表網站
 
-這是一個 **[Warframe 世界循環時間表網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，用來快速查看夜靈平野、奧布山谷、魔裔禁地、扎日曼號與渡域的目前狀態、剩餘時間，以及接下來的循環安排，方便玩家規劃遊戲內活動。
+這是一個 **[Warframe 世界循環時間表網站](https://meowxiaoxiang.github.io/Warframe-World-State-Timer/)**，用來快速查看夜靈平野、奧布山谷、魔裔禁地與渡域的目前狀態、剩餘時間，以及接下來的循環安排，方便玩家規劃遊戲內活動。
 
 ## 功能特色
 
@@ -36,12 +36,7 @@
     - 提供 Plains of Eidolon / Earth、Orb Vallis、Cambion Drift、Duviri 的循環錨點、狀態持續時間與狀態文字。
     - 本專案只參考 raw template 中的校準值與資料模型概念，不直接複製 Wiki 模板或 gadget 程式碼。
 
-2. **[Warframe Wiki: Template:Mainpage Box Timers](https://wiki.warframe.com/w/Template:Mainpage_Box_Timers)**
-
-    - 輔助資料來源。
-    - 用來確認首頁目前公開呈現哪些 timer，以及 Zariman 這類 `Countdown` 型資料的 `date`、`looptime`、`delaytime`。
-
-3. **[Warframe Wiki: MediaWiki:Gadget-CycleClock.js](https://wiki.warframe.com/w/MediaWiki:Gadget-CycleClock.js)**
+2. **[Warframe Wiki: MediaWiki:Gadget-CycleClock.js](https://wiki.warframe.com/w/MediaWiki:Gadget-CycleClock.js)**
 
     - 行為參考，不作為資料來源。
     - 僅用來理解 Wiki 前端如何呈現 cycle clock；本專案不複製其 JS/CSS 實作。

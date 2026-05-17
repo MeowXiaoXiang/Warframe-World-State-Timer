@@ -52,13 +52,6 @@
         "vome": "Vome"
       }
     },
-    "zariman": {
-      "name": "扎日曼號",
-      "states": {
-        "grineer": "Grineer",
-        "corpus": "Corpus"
-      }
-    },
     "duviri": {
       "name": "渡域",
       "states": {

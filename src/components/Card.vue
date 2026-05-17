@@ -46,13 +46,11 @@ const { t } = useI18n();
 const props = withDefaults(defineProps<{
     world: WorldCycle;
     status?: string | null;
-    nextCycle?: string | null;
     timeLeft?: string | null;
     icon?: string;
     theme?: WorldStateTheme | null;
 }>(), {
     status: null,
-    nextCycle: null,
     timeLeft: null,
     icon: "❓",
     theme: null,

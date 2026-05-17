@@ -89,7 +89,6 @@ export interface ScheduleRange {
 
 export interface WorldStatus {
 	status: string;
-	nextCycle: string;
 	icon: string;
 	theme: WorldStateTheme;
 	timeLeft: string;

@@ -28,46 +28,40 @@ const verificationTheme: WorldStateTheme = {
 	},
 };
 
-const labels: Record<string, { name: string; states: Record<string, string> }> = {
-	plains_earth: {
-		name: "Plains of Eidolon & Earth",
-		states: {
-			day: "Day",
-			night: "Night",
+const labels: Record<string, { name: string; states: Record<string, string> }> =
+	{
+		plains_earth: {
+			name: "Plains of Eidolon & Earth",
+			states: {
+				day: "Day",
+				night: "Night",
+			},
 		},
-	},
-	orb: {
-		name: "Orb Vallis",
-		states: {
-			warm: "Warm",
-			cold: "Cold",
+		orb: {
+			name: "Orb Vallis",
+			states: {
+				warm: "Warm",
+				cold: "Cold",
+			},
 		},
-	},
-	cambion: {
-		name: "Cambion Drift",
-		states: {
-			fass: "Fass",
-			vome: "Vome",
+		cambion: {
+			name: "Cambion Drift",
+			states: {
+				fass: "Fass",
+				vome: "Vome",
+			},
 		},
-	},
-	zariman: {
-		name: "Zariman Ten Zero",
-		states: {
-			grineer: "Grineer",
-			corpus: "Corpus",
+		duviri: {
+			name: "Duviri",
+			states: {
+				joy: "Joy",
+				anger: "Anger",
+				envy: "Envy",
+				sorrow: "Sorrow",
+				fear: "Fear",
+			},
 		},
-	},
-	duviri: {
-		name: "Duviri",
-		states: {
-			joy: "Joy",
-			anger: "Anger",
-			envy: "Envy",
-			sorrow: "Sorrow",
-			fear: "Fear",
-		},
-	},
-};
+	};
 
 const legacyExpectations: Record<
 	string,
@@ -97,16 +91,12 @@ const legacyExpectations: Record<
 			{ key: "vome", durationMs: 3000000 },
 		],
 	},
-	zariman: {
-		epochMs: Date.parse("2025-02-06T12:34:30Z"),
-		states: [
-			{ key: "corpus", durationMs: 9000000 },
-			{ key: "grineer", durationMs: 9000000 },
-		],
-	},
 };
 
-function normalizeForVerification(id: string, data: RawWorldCyclesData): WorldCycle {
+function normalizeForVerification(
+	id: string,
+	data: RawWorldCyclesData,
+): WorldCycle {
 	const rawWorld = data.worlds[id];
 	if (!rawWorld) {
 		throw new Error(`Missing world "${id}" in world_cycles.json.`);
@@ -129,7 +119,10 @@ function normalizeForVerification(id: string, data: RawWorldCyclesData): WorldCy
 		id,
 		name: worldLabels.name,
 		epochMs: rawWorld.epochMs,
-		loopDurationMs: states.reduce((total, state) => total + state.durationMs, 0),
+		loopDurationMs: states.reduce(
+			(total, state) => total + state.durationMs,
+			0,
+		),
 		states,
 	};
 }
@@ -143,12 +136,16 @@ function getStateStartOffsets(world: WorldCycle): number[] {
 	});
 }
 
-function expectActiveState(world: WorldCycle, nowMs: number, expectedKey: string): void {
+function expectActiveState(
+	world: WorldCycle,
+	nowMs: number,
+	expectedKey: string,
+): void {
 	const active = getActiveWorldState(world, nowMs);
 
 	if (active.state.key !== expectedKey) {
 		throw new Error(
-			`${world.id}: expected ${expectedKey} at ${new Date(nowMs).toISOString()}, got ${active.state.key}.`
+			`${world.id}: expected ${expectedKey} at ${new Date(nowMs).toISOString()}, got ${active.state.key}.`,
 		);
 	}
 }
@@ -161,7 +158,11 @@ function assertStateSequence(world: WorldCycle): void {
 		const stateEndMs = stateStartMs + state.durationMs;
 
 		expectActiveState(world, stateStartMs, state.key);
-		expectActiveState(world, stateStartMs + Math.floor(state.durationMs / 2), state.key);
+		expectActiveState(
+			world,
+			stateStartMs + Math.floor(state.durationMs / 2),
+			state.key,
+		);
 
 		if (state.durationMs > 1) {
 			expectActiveState(world, stateEndMs - 1, state.key);
@@ -171,16 +172,23 @@ function assertStateSequence(world: WorldCycle): void {
 		expectActiveState(world, stateEndMs, nextState.key);
 	});
 
-	expectActiveState(world, world.epochMs + world.loopDurationMs, world.states[0].key);
+	expectActiveState(
+		world,
+		world.epochMs + world.loopDurationMs,
+		world.states[0].key,
+	);
 	expectActiveState(world, world.epochMs - 1, world.states.at(-1)?.key ?? "");
 }
 
 function legacyStateAt(
 	nowMs: number,
 	epochMs: number,
-	states: Array<{ key: string; durationMs: number }>
+	states: Array<{ key: string; durationMs: number }>,
 ): string {
-	const loopDurationMs = states.reduce((total, state) => total + state.durationMs, 0);
+	const loopDurationMs = states.reduce(
+		(total, state) => total + state.durationMs,
+		0,
+	);
 	const positionMs = positiveModulo(nowMs - epochMs, loopDurationMs);
 	let offsetMs = 0;
 
@@ -208,7 +216,10 @@ function assertLegacyAlgorithmParity(worldId: string): void {
 		id: `${worldId}_legacy_algorithm_probe`,
 		name: worldId,
 		epochMs: legacy.epochMs,
-		loopDurationMs: states.reduce((total, state) => total + state.durationMs, 0),
+		loopDurationMs: states.reduce(
+			(total, state) => total + state.durationMs,
+			0,
+		),
 		states,
 	};
 	const loopDurationMs = legacyAsV2World.loopDurationMs;
@@ -225,11 +236,15 @@ function assertLegacyAlgorithmParity(worldId: string): void {
 
 	probes.forEach((probeMs) => {
 		const active = getActiveWorldState(legacyAsV2World, probeMs);
-		const expectedKey = legacyStateAt(probeMs, legacy.epochMs, legacy.states);
+		const expectedKey = legacyStateAt(
+			probeMs,
+			legacy.epochMs,
+			legacy.states,
+		);
 
 		if (active.state.key !== expectedKey) {
 			throw new Error(
-				`${worldId}: v2 algorithm ${active.state.key} differs from legacy algorithm ${expectedKey} at ${new Date(probeMs).toISOString()}.`
+				`${worldId}: v2 algorithm ${active.state.key} differs from legacy algorithm ${expectedKey} at ${new Date(probeMs).toISOString()}.`,
 			);
 		}
 	});
@@ -241,28 +256,34 @@ function assertLegacyDurationParity(world: WorldCycle): void {
 
 	const expectedLoopDurationMs = legacy.states.reduce(
 		(total, state) => total + state.durationMs,
-		0
+		0,
 	);
 	if (world.loopDurationMs !== expectedLoopDurationMs) {
-		throw new Error(`${world.id}: loop duration changed from legacy value.`);
+		throw new Error(
+			`${world.id}: loop duration changed from legacy value.`,
+		);
 	}
 }
 
-function assertScheduleContiguity(entries: CycleEntry[], world: WorldCycle): void {
+function assertScheduleContiguity(
+	entries: CycleEntry[],
+	world: WorldCycle,
+): void {
 	for (let index = 1; index < entries.length; index += 1) {
 		const previous = entries[index - 1];
 		const current = entries[index];
 
 		if (previous.endMs !== current.startMs) {
 			throw new Error(
-				`${world.id}: schedule gap/overlap between ${previous.stateKey} and ${current.stateKey}.`
+				`${world.id}: schedule gap/overlap between ${previous.stateKey} and ${current.stateKey}.`,
 			);
 		}
 
-		const expectedStateIndex = (previous.stateIndex + 1) % world.states.length;
+		const expectedStateIndex =
+			(previous.stateIndex + 1) % world.states.length;
 		if (current.stateIndex !== expectedStateIndex) {
 			throw new Error(
-				`${world.id}: expected schedule state index ${expectedStateIndex}, got ${current.stateIndex}.`
+				`${world.id}: expected schedule state index ${expectedStateIndex}, got ${current.stateIndex}.`,
 			);
 		}
 	}
@@ -273,20 +294,29 @@ function assertRangeBoundaryInclusion(world: WorldCycle): void {
 	const secondState = world.states[1] ?? world.states[0];
 	const range = {
 		startMs: world.epochMs + Math.floor(firstState.durationMs / 2),
-		endMs: world.epochMs + firstState.durationMs + Math.floor(secondState.durationMs / 2),
+		endMs:
+			world.epochMs +
+			firstState.durationMs +
+			Math.floor(secondState.durationMs / 2),
 	};
 	const entries = calculateCycleEntries(world, range);
 
 	if (entries.length < 2) {
-		throw new Error(`${world.id}: expected range boundary schedule to include crossed states.`);
+		throw new Error(
+			`${world.id}: expected range boundary schedule to include crossed states.`,
+		);
 	}
 
 	if (entries[0].stateKey !== firstState.key) {
-		throw new Error(`${world.id}: expected overlapping first range entry to be ${firstState.key}.`);
+		throw new Error(
+			`${world.id}: expected overlapping first range entry to be ${firstState.key}.`,
+		);
 	}
 
 	if (entries[1].stateKey !== secondState.key) {
-		throw new Error(`${world.id}: expected second range entry to be ${secondState.key}.`);
+		throw new Error(
+			`${world.id}: expected second range entry to be ${secondState.key}.`,
+		);
 	}
 }
 
@@ -297,12 +327,16 @@ function assertDuviriSequence(world: WorldCycle): void {
 	const actualKeys = world.states.map((state) => state.key);
 
 	if (actualKeys.join(",") !== expectedKeys.join(",")) {
-		throw new Error(`duviri: expected state order ${expectedKeys.join(",")}, got ${actualKeys.join(",")}.`);
+		throw new Error(
+			`duviri: expected state order ${expectedKeys.join(",")}, got ${actualKeys.join(",")}.`,
+		);
 	}
 
 	world.states.forEach((state) => {
 		if (state.durationMs !== 7200000) {
-			throw new Error(`duviri: expected ${state.key} duration to be 7200000ms.`);
+			throw new Error(
+				`duviri: expected ${state.key} duration to be 7200000ms.`,
+			);
 		}
 	});
 }
@@ -314,7 +348,9 @@ function verifySchedule(world: WorldCycle): void {
 
 	world.states.forEach((state) => {
 		if (!stateKeys.has(state.key)) {
-			throw new Error(`${world.id}: schedule did not include state "${state.key}".`);
+			throw new Error(
+				`${world.id}: schedule did not include state "${state.key}".`,
+			);
 		}
 	});
 
@@ -349,18 +385,22 @@ function benchmarkCycles(worlds: WorldCycle[]): void {
 	const statusDurationMs = performance.now() - statusStart;
 
 	console.log(
-		`Benchmark: ${scheduleIterations} schedule runs x ${worlds.length} worlds = ${scheduleDurationMs.toFixed(2)}ms`
+		`Benchmark: ${scheduleIterations} schedule runs x ${worlds.length} worlds = ${scheduleDurationMs.toFixed(2)}ms`,
 	);
 	console.log(
-		`Benchmark: ${statusIterations} current-state runs x ${worlds.length} worlds = ${statusDurationMs.toFixed(2)}ms`
+		`Benchmark: ${statusIterations} current-state runs x ${worlds.length} worlds = ${statusDurationMs.toFixed(2)}ms`,
 	);
 
 	if (scheduleDurationMs > 5000) {
-		throw new Error(`Schedule benchmark is unexpectedly slow: ${scheduleDurationMs.toFixed(2)}ms.`);
+		throw new Error(
+			`Schedule benchmark is unexpectedly slow: ${scheduleDurationMs.toFixed(2)}ms.`,
+		);
 	}
 
 	if (statusDurationMs > 1000) {
-		throw new Error(`Current-state benchmark is unexpectedly slow: ${statusDurationMs.toFixed(2)}ms.`);
+		throw new Error(
+			`Current-state benchmark is unexpectedly slow: ${statusDurationMs.toFixed(2)}ms.`,
+		);
 	}
 }
 
@@ -373,10 +413,14 @@ function formatRemaining(milliseconds: number): string {
 }
 
 const dataPath = resolve("public/data/world_cycles.json");
-const data = JSON.parse(await readFile(dataPath, "utf-8")) as RawWorldCyclesData;
+const data = JSON.parse(
+	await readFile(dataPath, "utf-8"),
+) as RawWorldCyclesData;
 
 if (data.version !== 2) {
-	throw new Error(`Expected world_cycles.json version 2, got ${data.version}.`);
+	throw new Error(
+		`Expected world_cycles.json version 2, got ${data.version}.`,
+	);
 }
 
 const worldIds = Object.keys(data.worlds);
@@ -384,7 +428,9 @@ const nowMs = Date.now();
 
 console.log(`Verifying ${worldIds.length} world cycles from ${dataPath}`);
 
-const worlds = worldIds.map((worldId) => normalizeForVerification(worldId, data));
+const worlds = worldIds.map((worldId) =>
+	normalizeForVerification(worldId, data),
+);
 
 worlds.forEach((world) => {
 	assertStateSequence(world);
@@ -395,7 +441,7 @@ worlds.forEach((world) => {
 
 	const active = getActiveWorldState(world, nowMs);
 	console.log(
-		`${world.id}: current=${active.state.label}, next=${active.nextState.label}, remaining=${formatRemaining(active.remainingMs)}, states=${world.states.length}`
+		`${world.id}: current=${active.state.label}, next=${active.nextState.label}, remaining=${formatRemaining(active.remainingMs)}, states=${world.states.length}`,
 	);
 });
 

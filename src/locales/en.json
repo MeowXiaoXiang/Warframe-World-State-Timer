@@ -52,13 +52,6 @@
         "vome": "Vome"
       }
     },
-    "zariman": {
-      "name": "Zariman Ten Zero",
-      "states": {
-        "grineer": "Grineer",
-        "corpus": "Corpus"
-      }
-    },
     "duviri": {
       "name": "Duviri",
       "states": {
