@@ -1,7 +1,7 @@
 {
   "name": "Warframe 世界循環時間表",
   "short_name": "Warframe 計時器",
-  "description": "Warframe 世界循環時間表，支援夜靈平野、奧布山谷、魔裔禁地與渡域。",
+  "description": "Warframe 世界循環時間表，支援夜靈平野與地球、奧布山谷、魔裔禁地與渡域。",
   "theme_color": "#333333",
   "background_color": "#121212",
   "display": "standalone",
