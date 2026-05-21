@@ -1,0 +1,66 @@
+{
+  "app": {
+    "siteName": "Warframe 世界循环时间表"
+  },
+  "time": {
+    "hours": "小时",
+    "minutes": "分",
+    "seconds": "秒"
+  },
+  "card": {
+    "timeLeftMessage": {
+      "prefix": "",
+      "suffix": "剩余时间"
+    }
+  },
+  "modal": {
+    "title": "世界循环时间表",
+    "legend": {
+      "notStarted": "尚未开始",
+      "next": "下一个",
+      "ongoing": "进行中",
+      "ended": "已结束"
+    }
+  },
+  "floatingButtons": {
+    "switchLanguage": "切换语言",
+    "switchToLightTheme": "切换至浅色主题",
+    "switchToDarkTheme": "切换至深色主题"
+  },
+  "header": {
+    "installApp": "安装 App"
+  },
+  "worlds": {
+    "plains_earth": {
+      "name": "夜灵平野 & 地球",
+      "states": {
+        "day": "白昼",
+        "night": "夜晚"
+      }
+    },
+    "orb": {
+      "name": "奥布山谷",
+      "states": {
+        "warm": "温暖",
+        "cold": "寒冷"
+      }
+    },
+    "cambion": {
+      "name": "魔裔禁地",
+      "states": {
+        "fass": "Fass",
+        "vome": "Vome"
+      }
+    },
+    "duviri": {
+      "name": "渡域",
+      "states": {
+        "joy": "喜悦",
+        "anger": "愤怒",
+        "envy": "嫉妒",
+        "sorrow": "悲伤",
+        "fear": "恐惧"
+      }
+    }
+  }
+}

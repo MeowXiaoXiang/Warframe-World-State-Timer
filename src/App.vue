@@ -142,16 +142,24 @@ const updateDocumentTitle = () => {
 };
 
 const updateDocumentLanguage = () => {
-	document.documentElement.lang = locale.value === "en-US" ? "en" : "zh-Hant";
+	const languageMap: Record<string, string> = {
+		"en-US": "en",
+		"zh-CN": "zh-Hans",
+		"zh-TW": "zh-Hant",
+	};
+	document.documentElement.lang = languageMap[locale.value] || "zh-Hant";
 };
 
 const updateManifestLink = () => {
 	const manifestElement = document.getElementById("app-manifest");
 	if (!manifestElement) return;
 
-	const manifestName = locale.value === "en-US"
-		? "manifest.en-US.webmanifest"
-		: "manifest.zh-TW.webmanifest";
+	const manifestMap: Record<string, string> = {
+		"en-US": "manifest.en-US.webmanifest",
+		"zh-CN": "manifest.zh-CN.webmanifest",
+		"zh-TW": "manifest.zh-TW.webmanifest",
+	};
+	const manifestName = manifestMap[locale.value] || "manifest.zh-TW.webmanifest";
 	manifestElement.setAttribute("href", `${import.meta.env.BASE_URL}${manifestName}`);
 };
 

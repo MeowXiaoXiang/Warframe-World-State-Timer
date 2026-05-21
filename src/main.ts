@@ -6,6 +6,7 @@ import "./style.css";
 
 import { createI18n } from "vue-i18n";
 import tw from "./locales/zh-TW.json";
+import cn from "./locales/zh-CN.json";
 import en from "./locales/en.json";
 
 import dayjs from "dayjs";
@@ -23,13 +24,18 @@ initTheme();
 
 registerSW({ immediate: true });
 
-const savedLocale = localStorage.getItem("locale") || "zh-TW";
+const supportedLocales = ["zh-TW", "zh-CN", "en-US"] as const;
+type SupportedLocale = typeof supportedLocales[number];
+const isSupportedLocale = (value: string | null): value is SupportedLocale =>
+    supportedLocales.includes(value as SupportedLocale);
+const savedLocale = localStorage.getItem("locale");
 const i18n = createI18n({
     legacy: false,
-    locale: savedLocale,
+    locale: isSupportedLocale(savedLocale) ? savedLocale : "zh-TW",
     fallbackLocale: "zh-TW",
     messages: {
         "zh-TW": tw,
+        "zh-CN": cn,
         "en-US": en,
     },
 });

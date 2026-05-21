@@ -14,7 +14,11 @@
 			</button>
 			<ul class="dropdown-menu custom-menu" :class="isDarkTheme ? 'dark' : 'light'">
 				<li>
-					<a class="dropdown-item" href="#" @click.prevent="switchLanguage('zh-TW')">中文</a>
+					<a class="dropdown-item" href="#" @click.prevent="switchLanguage('zh-TW')">繁體中文</a>
+				</li>
+				<li class="divider"></li>
+				<li>
+					<a class="dropdown-item" href="#" @click.prevent="switchLanguage('zh-CN')">简体中文</a>
 				</li>
 				<li class="divider"></li>
 				<li>
@@ -47,7 +51,9 @@ import { Dropdown } from "bootstrap";
 
 const { locale, t } = useI18n();
 
-const switchLanguage = (lang: "zh-TW" | "en-US") => {
+type SupportedLocale = "zh-TW" | "zh-CN" | "en-US";
+
+const switchLanguage = (lang: SupportedLocale) => {
 	locale.value = lang;
 	localStorage.setItem("locale", lang);
 };
