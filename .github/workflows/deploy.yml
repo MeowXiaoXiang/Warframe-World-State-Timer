@@ -25,9 +25,6 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Activate project pnpm version
-        run: corepack prepare pnpm@11.0.9 --activate
-
       - name: Verify pnpm version
         run: pnpm --version
 
@@ -37,11 +34,20 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
+      - name: Type check
+        run: pnpm type-check
+
       - name: Verify cycle data
         run: pnpm verify:cycles
 
+      - name: Verify public assets
+        run: pnpm verify:assets
+
       - name: Build project
         run: pnpm build
+
+      - name: Check whitespace errors
+        run: git diff --check
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

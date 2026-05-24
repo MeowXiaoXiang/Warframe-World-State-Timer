@@ -3,6 +3,18 @@
 		<LoadingComponent v-show="loadingVisible" @loading-complete="onLoadingComplete" />
 		<div id="main-content" :class="{ visible: !loadingVisible }">
 			<HeaderBar :site-name="t('app.siteName')" :current-time="currentTime" :current-timezone="currentTimezone" />
+			<section v-if="dataLoadStatus === 'error' && dataLoadError" class="data-error" role="alert">
+				<div>
+					<h2>{{ t("dataLoad.errorTitle") }}</h2>
+					<p>{{ t(dataLoadError.messageKey) }}</p>
+				</div>
+				<button type="button" class="btn btn-primary" @click="retryWorldDataLoad">
+					{{ t("dataLoad.retry") }}
+				</button>
+			</section>
+			<section v-else-if="dataLoadStatus === 'loading'" class="data-loading" aria-live="polite">
+				{{ t("dataLoad.loading") }}
+			</section>
 			<div id="card-container" class="container">
 				<CardComponent v-for="world in worlds" :key="world.id" :world="world"
 					:status="worldStatus[world.id]?.status"
@@ -28,7 +40,12 @@ import FloatingButtons from "./components/FloatingButtons.vue";
 import HeaderBar from "./components/HeaderBar.vue";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
-import { calculateWorldStatus, normalizeWorldCycle } from "./domain/worldCycles";
+import {
+	calculateWorldStatus,
+	normalizeWorldCycle,
+	parseWorldCyclesData,
+	WorldCyclesDataValidationError,
+} from "./domain/worldCycles";
 import type { ModalExpose, RawWorldCyclesData, WorldCycle, WorldStatusMap } from "./domain/worldCycles";
 
 dayjs.extend(timezone);
@@ -39,6 +56,8 @@ const loadingVisible = ref(true);
 const worlds = ref<WorldCycle[]>([]);
 const rawWorldData = ref<RawWorldCyclesData | null>(null);
 const worldStatus = ref<WorldStatusMap>({});
+const dataLoadStatus = ref<"idle" | "loading" | "success" | "error">("idle");
+const dataLoadError = ref<{ messageKey: string } | null>(null);
 const currentTime = ref("");
 const currentTimezone = ref("");
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -50,10 +69,8 @@ const timeZoneShortFormatter = new Intl.DateTimeFormat("en-US", {
 	timeZone: userTimeZone,
 	timeZoneName: "short",
 });
-const worldCyclesSchemaVersion = 2;
-const worldCyclesDataRevision = 3;
 const worldCyclesDataUrl =
-	`${import.meta.env.BASE_URL}data/world_cycles.json?v=${worldCyclesDataRevision}`;
+	`${import.meta.env.BASE_URL}data/world_cycles.json?v=${__WORLD_CYCLES_DATA_HASH__}`;
 let updateTimerId: ReturnType<typeof setInterval> | null = null;
 
 const modalComponent = ref<ModalExpose | null>(null);
@@ -70,58 +87,63 @@ const transformWorldData = (): WorldCycle[] => {
 const fetchWorldsData = async () => {
 	const response = await fetch(worldCyclesDataUrl);
 	if (!response.ok) {
-		throw new Error(`Failed to load world cycle data: ${response.status}`);
+		throw new WorldCyclesDataHttpError(response.status);
 	}
 
 	const data = await response.json();
-	if (!isRawWorldCyclesData(data)) {
-		throw new Error("Loaded world cycle data is not v2 schema.");
-	}
-
-	rawWorldData.value = data;
+	rawWorldData.value = parseWorldCyclesData(data);
 	worlds.value = transformWorldData();
 };
 
-const isThemePalette = (value: unknown) => {
-	if (!value || typeof value !== "object") return false;
-	const palette = value as Record<string, unknown>;
+class WorldCyclesDataHttpError extends Error {
+	constructor(readonly status: number) {
+		super(`Failed to load world cycle data: ${status}`);
+		this.name = "WorldCyclesDataHttpError";
+	}
+}
 
-	return (
-		typeof palette.accent === "string" &&
-		typeof palette.surface === "string" &&
-		typeof palette.text === "string"
-	);
-};
-
-const isRawWorldCyclesData = (value: unknown): value is RawWorldCyclesData => {
-	if (!value || typeof value !== "object") return false;
-	const data = value as Record<string, unknown>;
-	if (data.version !== worldCyclesSchemaVersion || !data.worlds || typeof data.worlds !== "object") {
-		return false;
+const getDataLoadErrorMessageKey = (error: unknown): string => {
+	if (error instanceof WorldCyclesDataHttpError) {
+		return "dataLoad.errorHttp";
 	}
 
-	return Object.values(data.worlds as Record<string, unknown>).every((world) => {
-		if (!world || typeof world !== "object") return false;
-		const rawWorld = world as Record<string, unknown>;
-		if (typeof rawWorld.epochMs !== "number" || !Array.isArray(rawWorld.states)) {
-			return false;
-		}
+	if (error instanceof WorldCyclesDataValidationError) {
+		return "dataLoad.errorSchema";
+	}
 
-		return rawWorld.states.every((state) => {
-			if (!state || typeof state !== "object") return false;
-			const rawState = state as Record<string, unknown>;
-			const theme = rawState.theme as Record<string, unknown> | undefined;
+	if (error instanceof SyntaxError) {
+		return "dataLoad.errorJson";
+	}
 
-			return (
-				typeof rawState.key === "string" &&
-				typeof rawState.durationMs === "number" &&
-				(!rawState.icon || typeof rawState.icon === "string") &&
-				!!theme &&
-				isThemePalette(theme.light) &&
-				isThemePalette(theme.dark)
-			);
-		});
-	});
+	if (error instanceof TypeError) {
+		return "dataLoad.errorNetwork";
+	}
+
+	return "dataLoad.errorUnknown";
+};
+
+const loadWorldsData = async () => {
+	dataLoadStatus.value = "loading";
+	dataLoadError.value = null;
+
+	try {
+		await fetchWorldsData();
+		worldStatus.value = calculateWorldStatus(worlds.value, { t });
+		dataLoadStatus.value = "success";
+	} catch (error) {
+		console.error(error);
+		rawWorldData.value = null;
+		worlds.value = [];
+		worldStatus.value = {};
+		dataLoadError.value = {
+			messageKey: getDataLoadErrorMessageKey(error),
+		};
+		dataLoadStatus.value = "error";
+	}
+};
+
+const retryWorldDataLoad = () => {
+	void loadWorldsData();
 };
 
 const updateTimeAndTimezone = () => {
@@ -219,12 +241,7 @@ onMounted(async () => {
 	updateDocumentTitle();
 	updateDocumentLanguage();
 	updateManifestLink();
-	try {
-		await fetchWorldsData();
-	} catch (error) {
-		console.error(error);
-	}
-	worldStatus.value = calculateWorldStatus(worlds.value, { t });
+	await loadWorldsData();
 	updateTimeAndTimezone();
 	updateTimerId = setInterval(() => {
 		worldStatus.value = calculateWorldStatus(worlds.value, { t });
@@ -255,5 +272,51 @@ onUnmounted(() => {
 #card-container {
 	margin-top: 0.75rem;
 	padding-bottom: 0.5rem;
+}
+
+.data-loading,
+.data-error {
+	width: min(92vw, 520px);
+	margin: 1rem auto 0;
+}
+
+.data-loading {
+	padding: 0.9rem 1rem;
+	text-align: center;
+	color: var(--text-color);
+}
+
+.data-error {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid rgba(220, 53, 69, 0.32);
+	border-radius: 8px;
+	background: rgba(220, 53, 69, 0.08);
+	color: var(--text-color);
+}
+
+.data-error h2 {
+	margin: 0 0 0.35rem;
+	font-size: 1rem;
+	font-weight: 700;
+}
+
+.data-error p {
+	margin: 0;
+	font-size: 0.92rem;
+}
+
+.data-error .btn {
+	flex: 0 0 auto;
+}
+
+@media (max-width: 575px) {
+	.data-error {
+		align-items: stretch;
+		flex-direction: column;
+	}
 }
 </style>

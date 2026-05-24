@@ -16,3 +16,5 @@ interface BeforeInstallPromptEvent extends Event {
 interface Navigator {
   standalone?: boolean;
 }
+
+declare const __WORLD_CYCLES_DATA_HASH__: string;

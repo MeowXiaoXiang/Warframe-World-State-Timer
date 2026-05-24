@@ -24,11 +24,17 @@
                 </p>
             </div>
             <div class="status-icon">
-                <template v-if="isImage(icon)">
-                    <img :src="icon" :alt="world.name" class="icon-image" :class="{ 'svg-icon': isSvg(icon) }" />
+                <template v-if="shouldShowImage">
+                    <img
+                        :src="icon"
+                        :alt="world.name"
+                        class="icon-image"
+                        :class="{ 'svg-icon': isSvg(icon) }"
+                        @error="handleImageError"
+                    />
                 </template>
                 <template v-else>
-                    <span>{{ icon }}</span>
+                    <span>{{ fallbackIcon }}</span>
                 </template>
             </div>
         </div>
@@ -37,7 +43,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { isDarkTheme } from "../utils/themeManager";
 import type { WorldCycle, WorldStatePalette, WorldStateTheme } from "../domain/worldCycles";
 
@@ -55,6 +61,14 @@ const props = withDefaults(defineProps<{
     icon: "❓",
     theme: null,
 });
+const imageLoadFailed = ref(false);
+
+watch(
+    () => props.icon,
+    () => {
+        imageLoadFailed.value = false;
+    }
+);
 
 const stateBadgeStyle = computed(() => {
     if (!props.theme) return {};
@@ -66,6 +80,14 @@ const stateBadgeStyle = computed(() => {
         "--state-text": palette.text,
     };
 });
+
+const shouldShowImage = computed(() => isImage(props.icon) && !imageLoadFailed.value);
+
+const fallbackIcon = computed(() => isImage(props.icon) ? "❓" : props.icon);
+
+const handleImageError = () => {
+    imageLoadFailed.value = true;
+};
 
 const isImage = (icon: string): boolean => {
     return /\.(svg|png|jpe?g|gif|webp|avif)$/i.test(icon);

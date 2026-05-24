@@ -6,6 +6,7 @@ import {
 	calculateCycleEntries,
 	getActiveWorldState,
 	getDefaultScheduleRange,
+	parseWorldCyclesData,
 	positiveModulo,
 } from "../src/domain/worldCycles";
 import type {
@@ -413,15 +414,9 @@ function formatRemaining(milliseconds: number): string {
 }
 
 const dataPath = resolve("public/data/world_cycles.json");
-const data = JSON.parse(
+const data = parseWorldCyclesData(JSON.parse(
 	await readFile(dataPath, "utf-8"),
-) as RawWorldCyclesData;
-
-if (data.version !== 2) {
-	throw new Error(
-		`Expected world_cycles.json version 2, got ${data.version}.`,
-	);
-}
+));
 
 const worldIds = Object.keys(data.worlds);
 const nowMs = Date.now();

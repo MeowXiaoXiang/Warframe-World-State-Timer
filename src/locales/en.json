@@ -2,6 +2,16 @@
   "app": {
     "siteName": "Warframe World Cycle Schedule"
   },
+  "dataLoad": {
+    "loading": "Loading world cycle data...",
+    "errorTitle": "Unable to load world cycle data",
+    "errorNetwork": "Check your connection, then try again.",
+    "errorHttp": "The data file is unavailable right now. Try again later.",
+    "errorJson": "The data file could not be read. Try again later.",
+    "errorSchema": "The data file does not match this app version. Try again later.",
+    "errorUnknown": "Something went wrong. Try again later.",
+    "retry": "Retry"
+  },
   "time": {
     "hours": "h",
     "minutes": "m",

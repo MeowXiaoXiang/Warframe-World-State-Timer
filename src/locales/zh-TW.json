@@ -2,6 +2,16 @@
   "app": {
     "siteName": "Warframe 世界循環時間表"
   },
+  "dataLoad": {
+    "loading": "正在載入世界循環資料...",
+    "errorTitle": "無法載入世界循環資料",
+    "errorNetwork": "請確認網路連線，或稍後再試。",
+    "errorHttp": "資料檔目前無法取得，請稍後再試。",
+    "errorJson": "資料檔格式無法讀取，請稍後再試。",
+    "errorSchema": "資料檔內容不符合目前版本，請稍後再試。",
+    "errorUnknown": "發生未知錯誤，請稍後再試。",
+    "retry": "重試"
+  },
   "time": {
     "hours": "小時",
     "minutes": "分",

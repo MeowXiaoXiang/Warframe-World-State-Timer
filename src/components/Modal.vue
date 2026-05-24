@@ -28,7 +28,14 @@
                             aria-hidden="true"
                             class="state-chip-image"
                             :class="{ 'svg-icon': isSvg(state.icon) }"
+                            @error="handleImageError"
                         />
+                        <span
+                            v-if="state.icon && isImage(state.icon)"
+                            hidden
+                            class="state-chip-icon image-fallback"
+                            aria-hidden="true"
+                        >?</span>
                         <span v-else-if="state.icon" class="state-chip-icon" aria-hidden="true">{{ state.icon }}</span>
                         {{ state.label }}
                     </span>
@@ -52,7 +59,14 @@
                                         aria-hidden="true"
                                         class="cycle-image"
                                         :class="{ 'svg-icon': isSvg(cycle.icon) }"
+                                        @error="handleImageError"
                                     />
+                                    <span
+                                        v-if="cycle.icon && isImage(cycle.icon)"
+                                        hidden
+                                        class="cycle-icon image-fallback"
+                                        aria-hidden="true"
+                                    >?</span>
                                     <span v-else-if="cycle.icon" class="cycle-icon" aria-hidden="true">{{ cycle.icon }}</span>
                                     <span>{{ cycle.label }}</span>
                                 </div>
@@ -94,6 +108,17 @@ const isImage = (icon: string): boolean => {
 
 const isSvg = (icon: string): boolean => {
     return /\.svg$/i.test(icon);
+};
+
+const handleImageError = (event: Event) => {
+    const image = event.currentTarget;
+    if (!(image instanceof HTMLImageElement)) return;
+
+    image.hidden = true;
+    const fallback = image.nextElementSibling;
+    if (fallback instanceof HTMLElement) {
+        fallback.hidden = false;
+    }
 };
 
 const getStateStyle = (theme: WorldStateTheme): Record<string, string> => {

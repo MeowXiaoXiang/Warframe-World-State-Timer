@@ -22,7 +22,15 @@ dayjs.extend(isBetween);
 
 initTheme();
 
-registerSW({ immediate: true });
+registerSW({
+    immediate: true,
+    onNeedReload: () => {
+        window.location.reload();
+    },
+    onRegisterError: (error) => {
+        console.error("Service worker registration failed.", error);
+    },
+});
 
 const supportedLocales = ["zh-TW", "zh-CN", "en-US"] as const;
 type SupportedLocale = typeof supportedLocales[number];
